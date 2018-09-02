@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <logo/>
-    <HelloWorld msg="Welcome to TarIboX"/>
+    <HelloWorld msg="TarIboX"/>
   </div>
 </template>
 

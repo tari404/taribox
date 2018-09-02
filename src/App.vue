@@ -20,11 +20,7 @@ body
   height 100vh
   width 100vw
 
-#nav
-  padding 30px
-  a
-    font-weight bold
-    color #50382c
-    &.router-link-exact-active
-      color #ea741d
+a
+  color #ea741d
+  text-decoration none
 </style>

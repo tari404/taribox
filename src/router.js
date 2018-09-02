@@ -21,6 +21,7 @@ export default new Router({
       children: Array.prototype.map.call(catalog, item => {
         return {
           path: item.path,
+          name: item.name,
           component: item.component
         }
       })

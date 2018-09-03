@@ -70,5 +70,5 @@ export default {
 .top-piece-mask
   background-color #ffffff
 .top-piece
-  background-color #ea741d
+  background-color #ff9b1f
 </style>

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 
-import catalog from '@/views/tools'
+import catalog from '@/views/tools/index.js'
 import Tools from '@/views/Tools'
 
 Vue.use(Router)

@@ -5,10 +5,26 @@
     </transition>
   </div>
 </template>
+
+<script>
+export default {
+  name: 'App',
+  created () {
+    window.addEventListener('touchmove', e => {
+      e.preventDefault()
+    }, {
+      passive: false
+    })
+  }
+}
+</script>
+
 <style lang="stylus">
 body
   margin 0
   overflow hidden
+  width 100%
+  height 100%
 .tb-remarks
   color #0004
 
@@ -18,15 +34,14 @@ body
   -moz-osx-font-smoothing grayscale
   text-align center
   color #50382c
-  display flex
-  justify-content center
-  align-items center
   margin 0
-  height 100vh
-  width 100vw
+  width 100%
+  height 100%
 
 .app-container
   position absolute
+  top 0
+  left 0
 
 a
   color #ea741d

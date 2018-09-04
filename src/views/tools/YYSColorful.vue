@@ -81,7 +81,6 @@ export default {
       this.stringifyOutput()
     },
     stringifyOutput () {
-      console.log(this.outputList)
       let output = ''
       this.outputList.forEach(el => {
         output += '#c' + el.color + el.text

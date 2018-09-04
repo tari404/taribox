@@ -60,17 +60,28 @@ export default {
       this.outputList = []
       this.rainbowConfig.startHue = parseInt(Math.random() * 360)
       const sH = this.rainbowConfig.startHue
-      for (let i = 0; i < this.input.length; i++) {
-        const text = this.input[i]
+      const stringLength = this.input.length
+      const maxColorCount = Math.floor((100 - stringLength) / 8)
+      const charCountPreColor = Math.floor(stringLength / maxColorCount)
+      const charCountIncrease = stringLength % maxColorCount
+      let j = 0
+      for (let i = 0; i < maxColorCount; i++) {
+        const cutLenght = charCountPreColor + (i < charCountIncrease ? 1 : 0)
+        const text = this.input.substr(j, cutLenght)
         const color = convert.hsv.hex(sH + i * 15, 100, 100)
         this.outputList.push({
           text,
           color
         })
+        j += cutLenght
+        if (j >= stringLength) {
+          break
+        }
       }
       this.stringifyOutput()
     },
     stringifyOutput () {
+      console.log(this.outputList)
       let output = ''
       this.outputList.forEach(el => {
         output += '#c' + el.color + el.text

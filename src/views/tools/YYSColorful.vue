@@ -42,7 +42,7 @@ export default {
   name: 'YYSColorful',
   data () {
     return {
-      colorBarWidth: 360,
+      colorBarWidth: 300,
       ctx: null,
 
       input: '',
@@ -184,7 +184,7 @@ export default {
     canvasUpdate () {
       for (let i = 0; i < this.colorBarWidth; i++) {
         this.ctx.fillStyle = this.getColor(i, true)
-        this.ctx.fillRect(i, 0, 1, 32)
+        this.ctx.fillRect(i, 0, 1, 34)
       }
     }
   },
@@ -235,9 +235,9 @@ export default {
 input
   font-family inherit
   color inherit
-  width 330px
+  width 270px
 .output
-  width 360px
+  width 300px
   word-break break-all
   margin-bottom 30px
 .color-bar

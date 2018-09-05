@@ -65,7 +65,7 @@ export default {
 .tools-nav
   flex 0 0 200px
   width 200px
-  height 100%
+  height 150vh
   background-color #ff9b1f
   transition .8s
   position relative
@@ -103,4 +103,8 @@ export default {
     flex 0 0 50px
   .tools-logo
     transform translateX(-50%) scale(0.4)
+
+@media screen and (max-width 400px)
+  .tools-nav
+    flex 0 0 0px
 </style>

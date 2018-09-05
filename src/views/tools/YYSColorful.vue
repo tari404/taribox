@@ -161,7 +161,12 @@ export default {
       if (needParse) {
         h = this.colorPhi + h * 360 / this.colorBarWidth
       }
-      return '#' + convert.hsv.hex(h, 90, 95)
+      h = h % 360
+      let v = 100
+      if (h < 220 && h > 20) {
+        v -= Math.cos((h - 120) * Math.PI / 200) * 30
+      }
+      return '#' + convert.hsv.hex(h, 90, v)
     },
     genRainbowText () {
       this.outputList = []

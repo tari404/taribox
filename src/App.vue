@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <transition name="right-slip">
-      <router-view class="app-container" />
-    </transition>
+    <!-- <transition name="right-slip"> -->
+    <router-view class="app-container" />
+    <!-- </transition> -->
   </div>
 </template>
 

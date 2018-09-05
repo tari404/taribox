@@ -30,11 +30,11 @@ export default {
     color () {
       switch (this.status) {
         case 'success':
-          return '#20de00'
+          return '#896952'
         case 'error':
-          return '#ff354c'
+          return '#896952'
         default:
-          return '#ff9b1f'
+          return '#896952'
       }
     }
   },

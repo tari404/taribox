@@ -1,7 +1,15 @@
 <template>
   <div id="yyscoloful">
     <p class="tag">输入要染色的文字</p>
-    <input class="yys-box" type="text" v-model="input" />
+    <input class="yys-box" type="text" v-model="input" @change="inputChange" />
+    <div id="yys-auto-copy-but" @click="autoCopyButClick">
+      <svg width="24" height="20" :style="{
+        'fill': autoCopy ? '#4a3a2b' : '#af9373'
+      }">
+        <text x="12" y="8">copy</text>
+        <text x="12" y="18">auto</text>
+      </svg>
+    </div>
     <p class="tag">生成结果</p>
     <input class="yys-box" type="text" readonly="readonly" v-model="output" />
     <div id="yys-output-copy-btn">
@@ -49,7 +57,9 @@ export default {
       outputList: [],
       output: '',
       copyIconStatus: 'default',
+      copyButton: null,
       clipboard: null,
+      autoCopy: false,
 
       colorReverse: false,
       colorPhi: 0,
@@ -77,6 +87,7 @@ export default {
     clipboard.on('error', () => {
       this.copyIconStatus = 'error'
     })
+    this.copyButton = this.$el.querySelector('#yys-output-copy-btn')
     this.clipboard = clipboard
     const canvas = this.$el.querySelector('#color-bar-bg')
     this.ctx = canvas.getContext('2d')
@@ -90,6 +101,9 @@ export default {
   methods: {
     onInputChange () {
       this.genRainbowText()
+    },
+    autoCopyButClick () {
+      this.autoCopy = !this.autoCopy
     },
     colorBarTouch (e) {
       e.stopPropagation()
@@ -131,7 +145,17 @@ export default {
       this.genRainbowText()
     },
     colorBarDragEnd () {
-      this.focusColorCtrlI = -1
+      if (this.focusColorCtrlI >= 0) {
+        this.focusColorCtrlI = -1
+        if (this.autoCopy) {
+          this.copyButton.click()
+        }
+      }
+    },
+    inputChange () {
+      if (this.autoCopy) {
+        this.copyButton.click()
+      }
     },
     getColor (h, needParse) {
       if (needParse) {
@@ -215,6 +239,18 @@ export default {
   text-align left
   font-size 12px
   line-height 18px
+#yys-auto-copy-but
+  float right
+  margin 7px 3px
+  height 20px
+  width 24px
+  font-size 12px
+  line-height 20px
+  cursor pointer
+  text
+    font-size 10px
+    text-anchor middle
+    transition fill .4s
 #yys-output-copy-btn
   float right
   margin 7px 5px

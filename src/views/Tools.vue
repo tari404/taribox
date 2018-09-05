@@ -4,6 +4,7 @@
       <div class="tools-logo">
         <logo-small @trigger="logoOnClick" />
       </div>
+      <!-- <a class="github-link" target="_blank" href="https://github.com/existencer/taribox">GitHub</a> -->
     </div>
     <div class="tools-container">
       <div v-if="showCatalog">
@@ -78,6 +79,13 @@ export default {
   transform translateX(-50%)
   transform-origin 50% 0
   transition transform .8s
+.github-link
+  color #fff
+  margin-top 120px
+  display block
+  width 100%
+  overflow hidden
+  font-size 14px
 .tools-container
   flex 1 1 100%
   display flex
@@ -106,5 +114,6 @@ export default {
 
 @media screen and (max-width 400px)
   .tools-nav
-    flex 0 0 0px
+    flex 0 0 0
+    width 0
 </style>

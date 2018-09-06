@@ -190,7 +190,10 @@ export default {
         this.nodeStates[i].isPassway = true
       })
       this.player = this.goal
-      this.goal = this.player
+      let newGoal = Math.floor(Math.random() * this.nodeStates.length - 1)
+      newGoal += newGoal >= this.player ? 1 : 0
+      this.obstacles[newGoal] = false
+      this.goal = newGoal
     },
     resetProgram () {
       this.program = null

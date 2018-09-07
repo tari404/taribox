@@ -93,7 +93,7 @@ export default {
       program: null,
       estFunc: 0,
       allowDiagonal: true,
-      greedy: 0,
+      greedy: 1,
 
       player: 0,
       goal: rows * cols - 1,

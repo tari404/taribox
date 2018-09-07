@@ -11,8 +11,13 @@
           'player': i === player,
           'goal': i === goal,
         }"
-        @click.left="toggleObs(i)"
-        @click.middle="toggleGoal(i)" />
+        @click.left="togglePlayer(i)"
+        @click.middle="toggleObs(i)"
+        @click.right.prevent="toggleGoal(i)">
+        <p>{{node.g}}</p>
+        <p>{{node.h}}</p>
+        <span>{{node.h + node.g}}</span>
+      </div>
     </div>
     <div class="options">Estimate func:
       <span @click="toggleFunc(0)" :class="{ 'active inactive': estFunc !== 0 }">Manhattan</span>
@@ -57,10 +62,13 @@ class NodeState {
   reset () {
     this.state = 0
     this.isPassway = false
+    this.g = ''
+    this.h = ''
   }
 }
 const nodeStates = []
-for (let i = 0; i < 100; i++) {
+const rows = 15
+for (let i = 0; i < 10 * rows; i++) {
   nodeStates.push(new NodeState())
 }
 
@@ -97,6 +105,14 @@ export default {
       this.resetProgram()
       this.obstacles[i] = false
       this.goal = i
+    },
+    togglePlayer (i) {
+      if (this.goal === i) {
+        return
+      }
+      this.resetProgram()
+      this.obstacles[i] = false
+      this.player = i
     },
     toggleFunc (funcNumber) {
       this.resetProgram()
@@ -143,7 +159,7 @@ export default {
       neighbors.forEach(offset => {
         const nx = offset.x + x
         const ny = offset.y + y
-        if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) {
+        if (nx >= 0 && nx < rows && ny >= 0 && ny < rows) {
           const ni = nx + ny * 10
           if (!this.obstacles[ni]) {
             neighborNodes.push(ni)
@@ -154,7 +170,7 @@ export default {
         obNeighbors.forEach(offset => {
           const nx = offset.x + x
           const ny = offset.y + y
-          if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) {
+          if (nx >= 0 && nx < rows && ny >= 0 && ny < rows) {
             const ni = nx + ny * 10
             if (!this.obstacles[ni]) {
               neighborNodes.push(ni)
@@ -190,7 +206,7 @@ export default {
       fScores.set(this.player, startHScore)
       let step = 0
       while (openSet.length) {
-        if (++step > 100) {
+        if (++step > this.nodeStates.length) {
           break
         }
         let x = 0
@@ -209,6 +225,7 @@ export default {
         openSet.splice(openSet.findIndex(item => item === x), 1)
         closeSet.push(x)
         const xgs = gScores.get(x)
+        const logs = []
         this.neighborNodesFrom(x).forEach(y => {
           if (closeSet.findIndex(item => item === y) !== -1) {
             return
@@ -226,12 +243,19 @@ export default {
             const hScore = this.estDistance(y, this.goal)
             hScores.set(y, hScore)
             fScores.set(y, updatedGScore + hScore)
-            openSet.push(y)
+            if (openSet.findIndex(item => item === y) === -1) {
+              openSet.push(y)
+            }
+            logs.push({
+              id: y,
+              g: updatedGScore,
+              h: Math.round(hScore)
+            })
           }
         })
         yield {
-          openSet,
-          closeSet
+          close: x,
+          logs
         }
       }
       return false
@@ -264,6 +288,9 @@ export default {
     genAStar (runToEnd) {
       this.resetProgram()
       this.program = this.aStar()
+      const start = this.nodeStates[this.player]
+      start.g = 0
+      start.h = this.estDistance(this.player, this.goal)
       if (runToEnd) {
         console.log(runToEnd)
         this.runToEnd()
@@ -278,12 +305,14 @@ export default {
             this.parseResult(result.value)
           }
         } else {
-          result.value.openSet.forEach(i => {
-            this.nodeStates[i].state = 1
+          result.value.logs.forEach(log => {
+            const i = log.id
+            const node = this.nodeStates[i]
+            node.state = 1
+            node.g = log.g
+            node.h = log.h
           })
-          result.value.closeSet.forEach(i => {
-            this.nodeStates[i].state = 2
-          })
+          this.nodeStates[result.value.close].state = 2
         }
         return result.done
       } else {
@@ -328,34 +357,42 @@ export default {
   div
     width 30px
     height 30px
+    padding 1px
+    box-sizing border-box
     position relative
     background-color #eee
-.goal:after
-  content ''
-  position absolute
-  width 24px
-  height 24px
-  border-radius 12px
-  background-color green
-  top 3px
-  left 3px
-.player:after
-  content ''
-  position absolute
-  width 24px
-  height 24px
-  border-radius 12px
-  background-color orange
-  top 3px
-  left 3px
+  p
+    margin 0
+    font-size 12px
+    line-height 14px
+    text-align right
+    opacity .4
+  span
+    position absolute
+    top 0
+    left 0
+    line-height 30px
+    color #fff
 .obstacle
-  background-color #333 !important
+  background-color #6f6f6f !important
 .open
-  background-color #999 !important
+  background-color #ffbc00 !important
 .close
-  background-color #666 !important
+  background-color #ff9323 !important
 .passway
-  background-color #ffe000 !important
+  background-color #8ac300 !important
+.goal
+  background-color #19a000 !important
+.player
+  // content ''
+  // position absolute
+  // width 24px
+  // height 24px
+  // border-radius 12px
+  // background-color orange
+  // top 3px
+  // left 3px
+  background-color #00a9dc !important
 .options
   span
     margin 0 10px

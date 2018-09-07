@@ -14,8 +14,21 @@
         @click.left="toggleObs(i)"
         @click.middle="toggleGoal(i)" />
     </div>
-    <div class="active" @click="genAStar">Run</div>
-    <div class="program-ctrl" :class="{ 'inactive': !program }">
+    <div class="options">Estimate func:
+      <span @click="toggleFunc(0)" :class="{ 'active inactive': estFunc !== 0 }">Manhattan</span>
+      <span @click="toggleFunc(1)" :class="{ 'active inactive': estFunc !== 1 }">Euclid</span>
+      <span @click="toggleFunc(2)" :class="{ 'active inactive': estFunc !== 2 }">Chebyshev</span>
+      <span @click="toggleFunc(3)" :class="{ 'active inactive': estFunc !== 3 }">Dijkstra</span>
+    </div>
+    <div class="options">Allow diagonal movement:
+      <span @click="toggleDiagonal(true)" :class="{ 'active inactive': !allowDiagonal }">On</span>
+      <span @click="toggleDiagonal(false)" :class="{ 'active inactive': allowDiagonal }">Off</span>
+    </div>
+    <div class="options">
+      <span class="active" @click="genAStar(false)">Run</span>
+      <span class="active" @click="genAStar(true)">Run to end</span>
+    </div>
+    <div class="options" :class="{ 'inactive': !program }">
       <span :class="{ 'active': program }" @click="nextStep">Next</span>
       <span :class="{ 'active': program }" @click="autoRun">Auto run</span>
       <span :class="{ 'active': program }" @click="runToEnd">Run to end</span>
@@ -25,14 +38,16 @@
 
 <script>
 const neighbors = [
-  // { x: -1, y: -1 },
-  // { x: 1, y: -1 },
-  // { x: 1, y: -1 },
-  // { x: 1, y: 1 },
   { x: 0, y: -1 },
   { x: -1, y: 0 },
   { x: 0, y: 1 },
   { x: 1, y: 0 }
+]
+const obNeighbors = [
+  { x: -1, y: -1 },
+  { x: 1, y: -1 },
+  { x: 1, y: 1 },
+  { x: -1, y: 1 }
 ]
 
 class NodeState {
@@ -54,6 +69,8 @@ export default {
   data () {
     return {
       program: null,
+      estFunc: 0,
+      allowDiagonal: true,
 
       player: 0,
       goal: 96,
@@ -81,6 +98,14 @@ export default {
       this.obstacles[i] = false
       this.goal = i
     },
+    toggleFunc (funcNumber) {
+      this.resetProgram()
+      this.estFunc = funcNumber
+    },
+    toggleDiagonal (isAllowed) {
+      this.resetProgram()
+      this.allowDiagonal = isAllowed
+    },
     genObstacles () {
       this.resetProgram()
       for (let i = 0; i < this.obstacles.length; i++) {
@@ -96,7 +121,20 @@ export default {
       const sy = Math.floor(start / 10)
       const gx = goal % 10
       const gy = Math.floor(goal / 10)
-      return Math.abs(sx - gx) + Math.abs(sy - gy)
+      const dx = Math.abs(sx - gx) * 2
+      const dy = Math.abs(sy - gy) * 2
+      switch (this.estFunc) {
+        case 0:
+          return dx + dy
+        case 1:
+          return Math.sqrt(dx * dx + dy * dy)
+        case 2:
+          return Math.min(dx, dy)
+        case 3:
+          return 0
+        default:
+          return dx + dy
+      }
     },
     neighborNodesFrom (node) {
       const x = node % 10
@@ -112,10 +150,32 @@ export default {
           }
         }
       })
+      if (this.allowDiagonal) {
+        obNeighbors.forEach(offset => {
+          const nx = offset.x + x
+          const ny = offset.y + y
+          if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) {
+            const ni = nx + ny * 10
+            if (!this.obstacles[ni]) {
+              neighborNodes.push(ni)
+            }
+          }
+        })
+      }
       return neighborNodes
     },
-    distBetween () {
-      return 1
+    distBetween (x, y) {
+      if (this.allowDiagonal) {
+        const dx = Math.abs(x - y) % 10
+        const dy = Math.abs(Math.floor(x / 10) - Math.floor(y / 10))
+        if (dx + dy === 1) {
+          return 2
+        } else {
+          return 3
+        }
+      } else {
+        return 2
+      }
     },
     * aStar () {
       const closeSet = []
@@ -189,11 +249,11 @@ export default {
       path.forEach(i => {
         this.nodeStates[i].isPassway = true
       })
-      this.player = this.goal
-      let newGoal = Math.floor(Math.random() * this.nodeStates.length - 1)
-      newGoal += newGoal >= this.player ? 1 : 0
-      this.obstacles[newGoal] = false
-      this.goal = newGoal
+      // this.player = this.goal
+      // let newGoal = Math.floor(Math.random() * this.nodeStates.length - 1)
+      // newGoal += newGoal >= this.player ? 1 : 0
+      // this.obstacles[newGoal] = false
+      // this.goal = newGoal
     },
     resetProgram () {
       this.program = null
@@ -201,9 +261,13 @@ export default {
         nodeState.reset()
       })
     },
-    genAStar () {
+    genAStar (runToEnd) {
       this.resetProgram()
       this.program = this.aStar()
+      if (runToEnd) {
+        console.log(runToEnd)
+        this.runToEnd()
+      }
     },
     nextStep () {
       if (this.program && this.program.next) {
@@ -257,6 +321,8 @@ export default {
   }
 }
 .map
+  width 309px
+  margin 20px auto
   display grid
   grid-gap 1px
   div
@@ -290,7 +356,7 @@ export default {
   background-color #666 !important
 .passway
   background-color #ffe000 !important
-.program-ctrl
+.options
   span
     margin 0 10px
 .active

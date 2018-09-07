@@ -14,8 +14,8 @@
           'player': i === player,
           'goal': i === goal,
         }"
-        @click.left="togglePlayer(i)"
-        @click.middle="toggleObs(i)"
+        @click.left="toggleObs(i)"
+        @click.middle="togglePlayer(i)"
         @click.right.prevent="toggleGoal(i)">
         <p>{{node.g}}</p>
         <p>{{node.h}}</p>
@@ -27,6 +27,11 @@
       <span @click="toggleFunc(1)" :class="{ 'active inactive': estFunc !== 1 }">Euclid</span>
       <span @click="toggleFunc(2)" :class="{ 'active inactive': estFunc !== 2 }">Chebyshev</span>
       <span @click="toggleFunc(3)" :class="{ 'active inactive': estFunc !== 3 }">Dijkstra</span>
+    </div>
+    <div class="options range">Greedy coefficient:
+      <span>0</span>
+      <input type="range" min="0" max="1" step="0.01" v-model="greedy">
+      <span>1</span>
     </div>
     <div class="options">Allow diagonal movement:
       <span @click="toggleDiagonal(true)" :class="{ 'active inactive': !allowDiagonal }">On</span>
@@ -88,6 +93,7 @@ export default {
       program: null,
       estFunc: 0,
       allowDiagonal: true,
+      greedy: 0,
 
       player: 0,
       goal: rows * cols - 1,
@@ -194,12 +200,12 @@ export default {
         const dx = Math.abs(x - y) % cols
         const dy = Math.abs(Math.floor(x / cols) - Math.floor(y / cols))
         if (dx + dy === 1) {
-          return 2
+          return 2 * this.greedy
         } else {
-          return 3
+          return 3 * this.greedy
         }
       } else {
-        return 2
+        return 2 * this.greedy
       }
     },
     * aStar () {
@@ -257,7 +263,7 @@ export default {
             }
             logs.push({
               id: y,
-              g: updatedGScore,
+              g: Math.round(updatedGScore),
               h: Math.round(hScore)
             })
           }
@@ -392,6 +398,10 @@ export default {
 .options
   span
     margin 0 10px
+.range
+  input
+    margin 3.5px 0
+    vertical-align bottom
 .run-button
   display inline-block
   padding 2px 8px

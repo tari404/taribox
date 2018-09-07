@@ -8,14 +8,14 @@
 
 <script>
 export default {
-  name: 'App',
-  created () {
-    window.addEventListener('touchmove', e => {
-      e.preventDefault()
-    }, {
-      passive: false
-    })
-  }
+  name: 'App'
+  // created () {
+  //   window.addEventListener('touchmove', e => {
+  //     e.preventDefault()
+  //   }, {
+  //     passive: false
+  //   })
+  // }
 }
 </script>
 

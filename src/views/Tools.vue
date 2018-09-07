@@ -94,7 +94,6 @@ export default {
 
 .tools-catalog
   display flex
-  align-items center
   flex-direction column
   ul
     margin 4px 0

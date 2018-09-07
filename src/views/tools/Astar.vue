@@ -1,7 +1,10 @@
 <template>
   <div id="a-star">
     <div class="active" @click="genObstacles">Random obstacles</div>
-    <div class="map">
+    <div class="map" :style="{
+      'grid': `auto-flow / repeat(${cols}, 1fr)`,
+      'width': `${cols * 31 - 1}px`
+    }">
       <div v-for="(node, i) in nodeStates" :key="i"
         :class="{
           'obstacle': obstacles[i],
@@ -29,9 +32,11 @@
       <span @click="toggleDiagonal(true)" :class="{ 'active inactive': !allowDiagonal }">On</span>
       <span @click="toggleDiagonal(false)" :class="{ 'active inactive': allowDiagonal }">Off</span>
     </div>
-    <div class="options">
-      <span class="active" @click="genAStar(false)">Run</span>
-      <span class="active" @click="genAStar(true)">Run to end</span>
+    <div class="flex">
+      <div class="options">
+        <span class="active run-button" @click="genAStar(false)">Run</span>
+        <span class="active run-button" @click="genAStar(true)">Run to end</span>
+      </div>
     </div>
     <div class="options" :class="{ 'inactive': !program }">
       <span :class="{ 'active': program }" @click="nextStep">Next</span>
@@ -68,7 +73,8 @@ class NodeState {
 }
 const nodeStates = []
 const rows = 15
-for (let i = 0; i < 10 * rows; i++) {
+const cols = 12
+for (let i = 0; i < cols * rows; i++) {
   nodeStates.push(new NodeState())
 }
 
@@ -76,12 +82,15 @@ export default {
   name: 'Astar',
   data () {
     return {
+      cols,
+      rows,
+
       program: null,
       estFunc: 0,
       allowDiagonal: true,
 
       player: 0,
-      goal: 96,
+      goal: rows * cols - 1,
       obstacles: [].fill.call({ length: nodeStates.length }, false),
       nodeStates,
       roads: [].fill.call({ length: nodeStates.length }, false)
@@ -133,10 +142,10 @@ export default {
       }
     },
     estDistance (start, goal) {
-      const sx = start % 10
-      const sy = Math.floor(start / 10)
-      const gx = goal % 10
-      const gy = Math.floor(goal / 10)
+      const sx = start % cols
+      const sy = Math.floor(start / cols)
+      const gx = goal % cols
+      const gy = Math.floor(goal / cols)
       const dx = Math.abs(sx - gx) * 2
       const dy = Math.abs(sy - gy) * 2
       switch (this.estFunc) {
@@ -153,14 +162,14 @@ export default {
       }
     },
     neighborNodesFrom (node) {
-      const x = node % 10
-      const y = Math.floor(node / 10)
+      const x = node % cols
+      const y = Math.floor(node / cols)
       const neighborNodes = []
       neighbors.forEach(offset => {
         const nx = offset.x + x
         const ny = offset.y + y
-        if (nx >= 0 && nx < rows && ny >= 0 && ny < rows) {
-          const ni = nx + ny * 10
+        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+          const ni = nx + ny * cols
           if (!this.obstacles[ni]) {
             neighborNodes.push(ni)
           }
@@ -170,8 +179,8 @@ export default {
         obNeighbors.forEach(offset => {
           const nx = offset.x + x
           const ny = offset.y + y
-          if (nx >= 0 && nx < rows && ny >= 0 && ny < rows) {
-            const ni = nx + ny * 10
+          if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+            const ni = nx + ny * cols
             if (!this.obstacles[ni]) {
               neighborNodes.push(ni)
             }
@@ -182,8 +191,8 @@ export default {
     },
     distBetween (x, y) {
       if (this.allowDiagonal) {
-        const dx = Math.abs(x - y) % 10
-        const dy = Math.abs(Math.floor(x / 10) - Math.floor(y / 10))
+        const dx = Math.abs(x - y) % cols
+        const dy = Math.abs(Math.floor(x / cols) - Math.floor(y / cols))
         if (dx + dy === 1) {
           return 2
         } else {
@@ -290,9 +299,8 @@ export default {
       this.program = this.aStar()
       const start = this.nodeStates[this.player]
       start.g = 0
-      start.h = this.estDistance(this.player, this.goal)
+      start.h = Math.round(this.estDistance(this.player, this.goal))
       if (runToEnd) {
-        console.log(runToEnd)
         this.runToEnd()
       }
     },
@@ -344,14 +352,9 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@css {
-  .map {
-    grid: auto-flow / repeat(10, 1fr);
-  }
-}
+#a-star>div
+  margin 10px auto
 .map
-  width 309px
-  margin 20px auto
   display grid
   grid-gap 1px
   div
@@ -361,6 +364,7 @@ export default {
     box-sizing border-box
     position relative
     background-color #eee
+    border-radius 2px
   p
     margin 0
     font-size 12px
@@ -384,18 +388,19 @@ export default {
 .goal
   background-color #19a000 !important
 .player
-  // content ''
-  // position absolute
-  // width 24px
-  // height 24px
-  // border-radius 12px
-  // background-color orange
-  // top 3px
-  // left 3px
   background-color #00a9dc !important
 .options
   span
     margin 0 10px
+.run-button
+  display inline-block
+  padding 2px 8px
+  background-color #ff9b1f
+  color #fff
+  border-radius 4px
+.flex
+  display flex
+  flex-direction column
 .active
   cursor pointer
 .inactive

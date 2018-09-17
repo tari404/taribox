@@ -7,7 +7,7 @@
     }">
       <div v-for="(node, i) in nodeStates" :key="i"
         :class="{
-          'obstacle': obstacles[i],
+          'obstacle': node.isObstacles,
           'open': node.state === 1,
           'close': node.state === 2,
           'passway': node.isPassway,
@@ -67,28 +67,23 @@ const obNeighbors = [
 
 class NodeState {
   constructor () {
-    this.reset()
+    this.resetCalculation()
+    this.isObstacles = false
   }
-  reset () {
+  resetCalculation () {
     this.state = 0
     this.isPassway = false
     this.g = ''
     this.h = ''
   }
 }
-const nodeStates = []
-const rows = 15
-const cols = 12
-for (let i = 0; i < cols * rows; i++) {
-  nodeStates.push(new NodeState())
-}
 
 export default {
   name: 'Astar',
   data () {
     return {
-      cols,
-      rows,
+      cols: 12,
+      rows: 15,
 
       program: null,
       estFunc: 0,
@@ -96,10 +91,13 @@ export default {
       greedy: 1,
 
       player: 0,
-      goal: rows * cols - 1,
-      obstacles: [].fill.call({ length: nodeStates.length }, false),
-      nodeStates,
-      roads: [].fill.call({ length: nodeStates.length }, false)
+      goal: 12 * 15 - 1,
+      nodeStates: []
+    }
+  },
+  created () {
+    for (let i = 0; i < this.cols * this.rows; i++) {
+      this.nodeStates.push(new NodeState())
     }
   },
   mounted () {
@@ -111,14 +109,15 @@ export default {
         return
       }
       this.resetProgram()
-      this.obstacles[i] = !this.obstacles[i]
+      const node = this.nodeStates[i]
+      node.isObstacles = !node.isObstacles
     },
     toggleGoal (i) {
       if (this.player === i) {
         return
       }
       this.resetProgram()
-      this.obstacles[i] = false
+      this.nodeStates[i].isObstacles = false
       this.goal = i
     },
     togglePlayer (i) {
@@ -126,7 +125,7 @@ export default {
         return
       }
       this.resetProgram()
-      this.obstacles[i] = false
+      this.nodeStates[i].isObstacles = false
       this.player = i
     },
     toggleFunc (funcNumber) {
@@ -139,19 +138,20 @@ export default {
     },
     genObstacles () {
       this.resetProgram()
-      for (let i = 0; i < this.obstacles.length; i++) {
+      for (let i = 0; i < this.nodeStates.length; i++) {
+        const node = this.nodeStates[i]
         if (i === this.player || i === this.goal) {
-          this.obstacles[i] = false
+          node.isObstacles = false
         } else {
-          this.obstacles[i] = Math.random() < 0.3
+          node.isObstacles = Math.random() < 0.3
         }
       }
     },
     estDistance (start, goal) {
-      const sx = start % cols
-      const sy = Math.floor(start / cols)
-      const gx = goal % cols
-      const gy = Math.floor(goal / cols)
+      const sx = start % this.cols
+      const sy = Math.floor(start / this.cols)
+      const gx = goal % this.cols
+      const gy = Math.floor(goal / this.cols)
       const dx = Math.abs(sx - gx) * 2
       const dy = Math.abs(sy - gy) * 2
       switch (this.estFunc) {
@@ -168,15 +168,15 @@ export default {
       }
     },
     neighborNodesFrom (node) {
-      const x = node % cols
-      const y = Math.floor(node / cols)
+      const x = node % this.cols
+      const y = Math.floor(node / this.cols)
       const neighborNodes = []
       neighbors.forEach(offset => {
         const nx = offset.x + x
         const ny = offset.y + y
-        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
-          const ni = nx + ny * cols
-          if (!this.obstacles[ni]) {
+        if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows) {
+          const ni = nx + ny * this.cols
+          if (!this.nodeStates[ni].isObstacles) {
             neighborNodes.push(ni)
           }
         }
@@ -185,9 +185,9 @@ export default {
         obNeighbors.forEach(offset => {
           const nx = offset.x + x
           const ny = offset.y + y
-          if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
-            const ni = nx + ny * cols
-            if (!this.obstacles[ni]) {
+          if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows) {
+            const ni = nx + ny * this.cols
+            if (!this.nodeStates[ni].isObstacles) {
               neighborNodes.push(ni)
             }
           }
@@ -197,8 +197,8 @@ export default {
     },
     distBetween (x, y) {
       if (this.allowDiagonal) {
-        const dx = Math.abs(x - y) % cols
-        const dy = Math.abs(Math.floor(x / cols) - Math.floor(y / cols))
+        const dx = Math.abs(x - y) % this.cols
+        const dy = Math.abs(Math.floor(x / this.cols) - Math.floor(y / this.cols))
         if (dx + dy === 1) {
           return 2 * this.greedy
         } else {
@@ -297,7 +297,7 @@ export default {
     resetProgram () {
       this.program = null
       this.nodeStates.forEach(nodeState => {
-        nodeState.reset()
+        nodeState.resetCalculation()
       })
     },
     genAStar (runToEnd) {

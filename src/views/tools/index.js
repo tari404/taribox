@@ -8,5 +8,10 @@ export default [
     name: 'Astar',
     path: 'astar',
     component: () => import(/* webpackChunkName: "tools" */ './Astar.vue')
+  },
+  {
+    name: 'i18nTrans',
+    path: 'i18n-trans',
+    component: () => import(/* webpackChunkName: "tools" */ './I18nTrans.vue')
   }
 ]

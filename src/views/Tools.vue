@@ -12,8 +12,10 @@
         <div class="tools-catalog">
           <div>
             <p class="tools-catalog-title">目录</p>
-            <ul v-for="(item, index) in catalog" :key="index">
-              <li><router-link :to="'/tools/' + item.path">{{item.name}}</router-link></li>
+            <ul>
+              <li v-for="(item, index) in catalog" :key="index">
+                <router-link :to="'/tools/' + item.path">{{item.name}}</router-link>
+              </li>
             </ul>
           </div>
         </div>
@@ -98,8 +100,10 @@ export default {
   ul
     margin 4px 0
     padding 0
+    text-align left
   li
     list-style none
+    margin 2px 0
     padding 0 4px
 .tools-catalog-title
   margin 0

@@ -15,7 +15,7 @@
 <script>
 import Frame from './Frame'
 
-const MAX_JUMP_HEIGHT = 94
+const MAX_JUMP_HEIGHT = 122
 
 const NO_JUMP = 0
 const JUMP_UP = 1
@@ -94,14 +94,16 @@ export default {
       }
       this.lastFrame = timer
       if (this.dinoJumping === JUMP_UP) {
-        this.dinoJumpHeight += MAX_JUMP_HEIGHT / 300 * delta
+        const dy = 2 * Math.sqrt(1 - this.dinoJumpHeight / (MAX_JUMP_HEIGHT + 1))
+        this.dinoJumpHeight += dy * MAX_JUMP_HEIGHT / 400 * delta
         if (this.dinoJumpHeight > MAX_JUMP_HEIGHT) {
           this.dinoJumpHeight = MAX_JUMP_HEIGHT
           this.dinoJumping = JUMP_DOWN
           this.dinoStatus = 'rightLeg'
         }
       } else if (this.dinoJumping === JUMP_DOWN) {
-        this.dinoJumpHeight -= MAX_JUMP_HEIGHT / 300 * delta
+        const dy = 2 * Math.sqrt(1 - this.dinoJumpHeight / (MAX_JUMP_HEIGHT + 1))
+        this.dinoJumpHeight -= dy * MAX_JUMP_HEIGHT / 400 * delta
         if (this.dinoJumpHeight < 0) {
           this.dinoJumpHeight = 0
           this.dinoJumping = NO_JUMP
@@ -111,6 +113,9 @@ export default {
       this.raf = requestAnimationFrame(this.render)
     },
     dinoJump () {
+      if (this.dinoJumping !== NO_JUMP) {
+        return
+      }
       this.dinoJumping = JUMP_UP
       this.dinoStatus = 'leftLeg'
     }
@@ -127,7 +132,7 @@ export default {
 #dino-scene
   position relative
   width 600px
-  height 200px
+  height 240px
   border solid 1px #ddd
   overflow hidden
 #dino-road

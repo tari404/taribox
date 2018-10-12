@@ -1,13 +1,26 @@
 <template>
   <div class="game-frame" :style="{
-    'background-image': `url(${asset})`
+    'background-image': `url(${asset})`,
+    'background-position-x': bgOffsetX
   }" />
 </template>
 
 <script>
 export default {
   name: 'Frame',
-  props: ['asset']
+  props: [
+    'asset',
+    'scrollX'
+  ],
+  computed: {
+    bgOffsetX () {
+      const scrollX = this.scrollX
+      if (typeof scrollX === 'number') {
+        return scrollX + 'px'
+      }
+      return scrollX || '0'
+    }
+  }
 }
 </script>
 

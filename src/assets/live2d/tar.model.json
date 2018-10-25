@@ -1,0 +1,9 @@
+{
+	"type": "Live2D Model Setting",
+	"name": "tar",
+	"model": "tar.moc",
+	"textures": [
+		"tar.2048/texture_00.png",
+		"tar.2048/texture_01.png"
+	]
+}

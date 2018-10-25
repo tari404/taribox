@@ -8,5 +8,10 @@ export default [
     name: 'Snake',
     path: 'snake',
     component: () => import(/* webpackChunkName: "games" */ './Snake.vue')
+  },
+  {
+    name: 'Tar',
+    path: 'tar',
+    component: () => import(/* webpackChunkName: "live2d" */ './Tar.vue')
   }
 ]

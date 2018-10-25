@@ -1,7 +1,7 @@
 <template>
   <div>
     <canvas id="tar-canvas" width="500" height="500"></canvas>
-    <p style="margin-bottom: 0;">Eyes</p>
+    <p style="margin: 4px 0;">Eyes</p>
     <input type="range" min="0" max="1" step="any" v-model="eyeROpen">
     <input type="range" min="0" max="1" step="any" v-model="eyeLOpen">
   </div>

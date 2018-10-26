@@ -15,17 +15,31 @@
 import { Live2D, Live2DModelWebGL, UtSystem } from '@/assets/live2d.min.js'
 import model from '@/assets/live2d/tar.moc'
 
-function * genTouchHeadAnimation (initialBrowAngle, initialEyesROpen, initialEyesLOpen) {
-  let browAngle = initialBrowAngle
-  let eyesROpen = initialEyesROpen
-  let eyesLOpen = initialEyesLOpen
+function * genBlinkAnimation () {
   const T = 10
   for (let i = 0; i <= 2 * T; i++) {
     const k = (Math.cos(i / T * Math.PI) + 1) / 2
-    eyesROpen = k * initialEyesROpen
-    eyesLOpen = k * initialEyesLOpen
-    yield { browAngle, eyesROpen, eyesLOpen }
+    yield k
   }
+}
+function * genShakeAnimation () {
+  const T = 18
+  for (let i = 0; i <= 3 * T; i++) {
+    const k = -Math.sin(Math.log(i / T + 1) * Math.PI * 3) * (1 - i / T / 3)
+    yield k
+  }
+}
+function getIteratorValue (parent, name, defaultValue) {
+  const iterator = parent[name]
+  if (iterator) {
+    const { value, done } = iterator.next()
+    if (done) {
+      parent[name] = null
+    } else {
+      return value
+    }
+  }
+  return defaultValue
 }
 
 export default {
@@ -41,7 +55,11 @@ export default {
       eyeBallYMoveTo: 0,
       browAngle: 0,
 
-      animation: null,
+      blink: null,
+      blinkTimer: 0,
+      blinkInterval: 4000 + Math.random() * 1000,
+      shake: null,
+      lastFrame: 0,
       raf: 0
     }
   },
@@ -79,6 +97,7 @@ export default {
     ]).then(res => {
       live2DModel.setTexture(0, this.createTexture(texture0))
       live2DModel.setTexture(1, this.createTexture(texture1))
+      this.lastFrame = UtSystem.getUserTimeMSec()
       this.raf = requestAnimationFrame(this.render)
     })
 
@@ -106,8 +125,8 @@ export default {
       return texture
     },
     onClick () {
-      if (!this.animation) {
-        this.animation = genTouchHeadAnimation(this.browAngle, this.eyeROpen, this.eyeLOpen)
+      if (!this.shake) {
+        this.shake = genShakeAnimation()
       }
     },
     onMouseMove (e) {
@@ -137,34 +156,45 @@ export default {
       const gl = this.gl
       const live2DModel = this.live2DModel
 
+      const msec = UtSystem.getUserTimeMSec()
+      const dt = msec - this.lastFrame
+      this.lastFrame = msec
+
+      this.blinkTimer += dt
+      if (this.blinkTimer > this.blinkInterval) {
+        this.blinkTimer -= this.blinkInterval
+        this.blinkInterval = 4000 + Math.random() * 1000
+        if (!this.blink) {
+          this.blink = genBlinkAnimation()
+        }
+      }
+
       this.eyeBallX += (this.eyeBallXMoveTo - this.eyeBallX) * 0.05
       this.eyeBallY += (this.eyeBallYMoveTo - this.eyeBallY) * 0.05
 
       gl.clearColor(0.9372, 0.9215, 0.9254, 1.0)
       gl.clear(gl.COLOR_BUFFER_BIT)
 
-      if (this.animation) {
-        const { value, done } = this.animation.next()
-        if (done) {
-          this.animation = null
-        } else {
-          this.browAngle = value.browAngle
-          this.eyeROpen = value.eyesROpen
-          this.eyeLOpen = value.eyesLOpen
-        }
-      }
+      const eyeOpenK = getIteratorValue(this, 'blink', 1)
+      const rabbitEarAngle = getIteratorValue(this, 'shake', 0)
 
-      const t1 = UtSystem.getUserTimeMSec() * 0.0001 * 7 * Math.PI
-      const t2 = UtSystem.getUserTimeMSec() * 0.0001 * 17 * Math.PI
-      const cycle = 3.0
-      live2DModel.setParamFloat('PARAM_ANGLE_X', 10 * Math.sin(t1 / cycle))
-      live2DModel.setParamFloat('PARAM_ANGLE_Y', 20 * Math.sin(t2 / cycle))
-      live2DModel.setParamFloat('PARAM_EYE_R_OPEN', this.eyeROpen)
-      live2DModel.setParamFloat('PARAM_EYE_L_OPEN', this.eyeLOpen)
+      const t1 = msec / 1000 / 7.3 * Math.PI
+      const t2 = msec / 1000 / 2.3 * Math.PI
+      const t3 = msec / 1000 / 1.7 * Math.PI
+
+      live2DModel.setParamFloat('PARAM_ANGLE_X', 10 * Math.sin(t1))
+      live2DModel.setParamFloat('PARAM_ANGLE_Y', 20 * Math.sin(t2))
+      live2DModel.setParamFloat('PARAM_EYE_R_OPEN', this.eyeROpen * eyeOpenK)
+      live2DModel.setParamFloat('PARAM_EYE_L_OPEN', this.eyeLOpen * eyeOpenK)
       live2DModel.setParamFloat('PARAM_EYE_BALL_X', this.eyeBallX)
       live2DModel.setParamFloat('PARAM_EYE_BALL_Y', this.eyeBallY)
       live2DModel.setParamFloat('PARAM_BROW_R_ANGLE', this.browAngle)
+      // live2DModel.setParamFloat('PARAM_BROW_R_X', 0)
+      // live2DModel.setParamFloat('PARAM_BROW_R_Y', 0)
       live2DModel.setParamFloat('PARAM_BROW_L_ANGLE', this.browAngle)
+      // live2DModel.setParamFloat('PARAM_BROW_L_X', 0)
+      // live2DModel.setParamFloat('PARAM_BROW_L_Y', 0)
+      live2DModel.setParamFloat('PARAM_RABBIT_EAR_ANGLE', Math.sin(t3) * 0.2 + rabbitEarAngle * 0.4)
 
       live2DModel.update()
       live2DModel.draw()

@@ -1,7 +1,7 @@
 <template>
   <div id="game-tar" class="flex-container">
     <div>
-      <canvas id="tar-canvas" width="350" height="500"></canvas>
+      <canvas @click="onClick" id="tar-canvas" width="350" height="500"></canvas>
       <p style="margin: 4px 0;">Eyes</p>
       <input type="range" min="0" max="1" step="any" v-model="eyeROpen">
       <input type="range" min="0" max="1" step="any" v-model="eyeLOpen">
@@ -14,6 +14,19 @@
 <script>
 import { Live2D, Live2DModelWebGL, UtSystem } from '@/assets/live2d.min.js'
 import model from '@/assets/live2d/tar.moc'
+
+function * genTouchHeadAnimation (initialBrowAngle, initialEyesROpen, initialEyesLOpen) {
+  let browAngle = initialBrowAngle
+  let eyesROpen = initialEyesROpen
+  let eyesLOpen = initialEyesLOpen
+  const T = 10
+  for (let i = 0; i <= 2 * T; i++) {
+    const k = (Math.cos(i / T * Math.PI) + 1) / 2
+    eyesROpen = k * initialEyesROpen
+    eyesLOpen = k * initialEyesLOpen
+    yield { browAngle, eyesROpen, eyesLOpen }
+  }
+}
 
 export default {
   name: 'Tar',
@@ -28,6 +41,7 @@ export default {
       eyeBallYMoveTo: 0,
       browAngle: 0,
 
+      animation: null,
       raf: 0
     }
   },
@@ -91,6 +105,11 @@ export default {
 
       return texture
     },
+    onClick () {
+      if (!this.animation) {
+        this.animation = genTouchHeadAnimation(this.browAngle, this.eyeROpen, this.eyeLOpen)
+      }
+    },
     onMouseMove (e) {
       this.eyeBallXMoveTo = e.pageX / innerWidth * 2 - 1
       this.eyeBallYMoveTo = 1 - e.pageY / innerHeight * 2
@@ -98,13 +117,11 @@ export default {
     onMouseOut (e) {
       var from = e.relatedTarget || e.toElement
       if (!from || from.nodeName === 'HTML') {
-        console.log(1)
         this.eyeBallXMoveTo = 0
         this.eyeBallYMoveTo = 0
       }
     },
     onTouchMove (e) {
-      console.log(2)
       if (e.target.tagName !== 'INPUT') {
         e.preventDefault()
       }
@@ -126,8 +143,19 @@ export default {
       gl.clearColor(0.9372, 0.9215, 0.9254, 1.0)
       gl.clear(gl.COLOR_BUFFER_BIT)
 
-      const t1 = UtSystem.getUserTimeMSec() * 0.0001 * 13 * Math.PI
-      const t2 = UtSystem.getUserTimeMSec() * 0.0001 * 11 * Math.PI
+      if (this.animation) {
+        const { value, done } = this.animation.next()
+        if (done) {
+          this.animation = null
+        } else {
+          this.browAngle = value.browAngle
+          this.eyeROpen = value.eyesROpen
+          this.eyeLOpen = value.eyesLOpen
+        }
+      }
+
+      const t1 = UtSystem.getUserTimeMSec() * 0.0001 * 7 * Math.PI
+      const t2 = UtSystem.getUserTimeMSec() * 0.0001 * 17 * Math.PI
       const cycle = 3.0
       live2DModel.setParamFloat('PARAM_ANGLE_X', 10 * Math.sin(t1 / cycle))
       live2DModel.setParamFloat('PARAM_ANGLE_Y', 20 * Math.sin(t2 / cycle))

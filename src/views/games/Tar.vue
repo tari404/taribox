@@ -158,6 +158,9 @@ export default {
 
       const msec = UtSystem.getUserTimeMSec()
       const dt = msec - this.lastFrame
+      if (dt > 1500) {
+        dt = 0
+      }
       this.lastFrame = msec
 
       this.blinkTimer += dt

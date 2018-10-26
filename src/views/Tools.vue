@@ -1,17 +1,17 @@
 <template>
   <div id="tools">
-    <div class="tools-nav">
-      <div class="tools-logo">
+    <div class="tari-nav">
+      <div class="tari-logo">
         <logo-small @trigger="logoOnClick" />
       </div>
       <!-- <a class="github-link" target="_blank" href="https://github.com/existencer/taribox">GitHub</a> -->
     </div>
-    <div class="tools-container">
+    <div class="flex-containe">
       <div v-if="showCatalog">
         <p class="tb-remarks">页面样式重构中...</p>
-        <div class="tools-catalog">
+        <div class="tari-catalog">
           <div>
-            <p class="tools-catalog-title">目录</p>
+            <p class="tari-catalog-title">目录</p>
             <ul>
               <li v-for="(item, index) in catalog" :key="index">
                 <router-link :to="'/tools/' + item.path">{{item.name}}</router-link>
@@ -65,58 +65,4 @@ export default {
   display flex
   width 100%
   height 100%
-.tools-nav
-  flex 0 0 200px
-  width 200px
-  height 150vh
-  background-color #ff9b1f
-  transition .8s
-  position relative
-.tools-logo
-  width 100px
-  height 100px
-  position absolute
-  top 10px
-  left 50%
-  transform translateX(-50%)
-  transform-origin 50% 0
-  transition transform .8s
-.github-link
-  color #fff
-  margin-top 120px
-  display block
-  width 100%
-  overflow hidden
-  font-size 14px
-.tools-container
-  flex 1 1 100%
-  display flex
-  align-items center
-  justify-content center
-
-.tools-catalog
-  display flex
-  flex-direction column
-  ul
-    margin 4px 0
-    padding 0
-    text-align left
-  li
-    list-style none
-    margin 2px 0
-    padding 0 4px
-.tools-catalog-title
-  margin 0
-  text-align left
-
-@media screen and (max-width 600px)
-  .tools-nav
-    flex 0 0 50px
-  .tools-logo
-    transform translateX(-50%) scale(0.4)
-
-@media screen and (max-width 400px)
-  .tools-nav
-    flex 0 0 0
-    width 0
 </style>

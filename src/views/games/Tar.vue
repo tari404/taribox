@@ -1,9 +1,13 @@
 <template>
-  <div>
-    <canvas id="tar-canvas" width="500" height="500"></canvas>
-    <p style="margin: 4px 0;">Eyes</p>
-    <input type="range" min="0" max="1" step="any" v-model="eyeROpen">
-    <input type="range" min="0" max="1" step="any" v-model="eyeLOpen">
+  <div id="game-tar" class="flex-container">
+    <div>
+      <canvas id="tar-canvas" width="350" height="500"></canvas>
+      <p style="margin: 4px 0;">Eyes</p>
+      <input type="range" min="0" max="1" step="any" v-model="eyeROpen">
+      <input type="range" min="0" max="1" step="any" v-model="eyeLOpen">
+      <p style="margin: 4px 0;">Brow</p>
+      <input type="range" min="-1" max="1" step="any" v-model="browAngle">
+    </div>
   </div>
 </template>
 
@@ -20,6 +24,7 @@ export default {
       eyeLOpen: 1,
       eyeBallX: 0,
       eyeBallY: 0,
+      browAngle: 0,
 
       raf: 0
     }
@@ -36,12 +41,15 @@ export default {
 
     const live2DModel = Live2DModelWebGL.loadModel(model)
     this.live2DModel = live2DModel
-    const s = 2 / live2DModel.getCanvasWidth()
+    const t = 2 / live2DModel.getCanvasHeight()
+    const mk = live2DModel.getCanvasWidth() / live2DModel.getCanvasHeight()
+    const k = canvas.height / canvas.width
+    const s = t * k
     const matrix4x4 = [
       s, 0, 0, 0,
-      0, -s, 0, 0,
+      0, -t, 0, 0,
       0, 0, 1, 0,
-      -1, 1, 0, 1
+      -k * mk * 1.04, 1, 0, 1
     ]
     live2DModel.setMatrix(matrix4x4)
 
@@ -59,6 +67,7 @@ export default {
     })
 
     addEventListener('mousemove', this.onMouseMove)
+    addEventListener('touchmove', this.onTouchMove)
   },
   methods: {
     createTexture (image) {
@@ -82,11 +91,16 @@ export default {
       this.eyeBallX = e.pageX / innerWidth * 2 - 1
       this.eyeBallY = 1 - e.pageY / innerHeight * 2
     },
+    onTouchMove (e) {
+      const t = e.touches[0]
+      this.eyeBallX = t.pageX / innerWidth * 2 - 1
+      this.eyeBallY = 1 - t.pageY / innerHeight * 2
+    },
     render () {
       const gl = this.gl
       const live2DModel = this.live2DModel
 
-      gl.clearColor(0.9372, 0.9215, 0.9254, 0.0)
+      gl.clearColor(0.9372, 0.9215, 0.9254, 1.0)
       gl.clear(gl.COLOR_BUFFER_BIT)
 
       const t1 = UtSystem.getUserTimeMSec() * 0.0001 * 13 * Math.PI
@@ -98,6 +112,8 @@ export default {
       live2DModel.setParamFloat('PARAM_EYE_L_OPEN', this.eyeLOpen)
       live2DModel.setParamFloat('PARAM_EYE_BALL_X', this.eyeBallX)
       live2DModel.setParamFloat('PARAM_EYE_BALL_Y', this.eyeBallY)
+      live2DModel.setParamFloat('PARAM_BROW_R_ANGLE', this.browAngle)
+      live2DModel.setParamFloat('PARAM_BROW_L_ANGLE', this.browAngle)
 
       live2DModel.update()
       live2DModel.draw()
@@ -108,6 +124,14 @@ export default {
   beforeDestroy () {
     cancelAnimationFrame(this.raf)
     removeEventListener('mousemove', this.onMouseMove)
+    removeEventListener('touchmove', this.onTouchMove)
   }
 }
 </script>
+
+<style lang="stylus" scoped>
+#game-tar
+  background-color #efebec
+  width 100%
+  height 100%
+</style>

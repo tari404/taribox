@@ -24,6 +24,8 @@ export default {
       eyeLOpen: 1,
       eyeBallX: 0,
       eyeBallY: 0,
+      eyeBallXMoveTo: 0,
+      eyeBallYMoveTo: 0,
       browAngle: 0,
 
       raf: 0
@@ -67,7 +69,9 @@ export default {
     })
 
     addEventListener('mousemove', this.onMouseMove)
-    addEventListener('touchmove', this.onTouchMove)
+    addEventListener('mouseout', this.onMouseOut)
+    addEventListener('touchmove', this.onTouchMove, { passive: false })
+    addEventListener('touchend', this.onTouchEnd)
   },
   methods: {
     createTexture (image) {
@@ -88,17 +92,36 @@ export default {
       return texture
     },
     onMouseMove (e) {
-      this.eyeBallX = e.pageX / innerWidth * 2 - 1
-      this.eyeBallY = 1 - e.pageY / innerHeight * 2
+      this.eyeBallXMoveTo = e.pageX / innerWidth * 2 - 1
+      this.eyeBallYMoveTo = 1 - e.pageY / innerHeight * 2
+    },
+    onMouseOut (e) {
+      var from = e.relatedTarget || e.toElement
+      if (!from || from.nodeName === 'HTML') {
+        console.log(1)
+        this.eyeBallXMoveTo = 0
+        this.eyeBallYMoveTo = 0
+      }
     },
     onTouchMove (e) {
+      console.log(2)
+      if (e.target.tagName !== 'INPUT') {
+        e.preventDefault()
+      }
       const t = e.touches[0]
-      this.eyeBallX = t.pageX / innerWidth * 2 - 1
-      this.eyeBallY = 1 - t.pageY / innerHeight * 2
+      this.eyeBallXMoveTo = t.pageX / innerWidth * 2 - 1
+      this.eyeBallYMoveTo = 1 - t.pageY / innerHeight * 2
+    },
+    onTouchEnd () {
+      this.eyeBallXMoveTo = 0
+      this.eyeBallYMoveTo = 0
     },
     render () {
       const gl = this.gl
       const live2DModel = this.live2DModel
+
+      this.eyeBallX += (this.eyeBallXMoveTo - this.eyeBallX) * 0.05
+      this.eyeBallY += (this.eyeBallYMoveTo - this.eyeBallY) * 0.05
 
       gl.clearColor(0.9372, 0.9215, 0.9254, 1.0)
       gl.clear(gl.COLOR_BUFFER_BIT)
@@ -124,7 +147,9 @@ export default {
   beforeDestroy () {
     cancelAnimationFrame(this.raf)
     removeEventListener('mousemove', this.onMouseMove)
+    removeEventListener('mouseout', this.onMouseOut)
     removeEventListener('touchmove', this.onTouchMove)
+    removeEventListener('touchend', this.onTouchEnd)
   }
 }
 </script>

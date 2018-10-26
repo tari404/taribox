@@ -25,8 +25,6 @@ body
   overflow hidden
   width 100%
   height 100%
-.tb-remarks
-  color #0004
 
 #app
   font-family 'PingFang SC', 'Microsoft YaHei', sans-serif

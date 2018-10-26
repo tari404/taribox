@@ -6,7 +6,7 @@
       </div>
       <!-- <a class="github-link" target="_blank" href="https://github.com/existencer/taribox">GitHub</a> -->
     </div>
-    <div class="flex-containe">
+    <div class="flex-container">
       <div v-if="showCatalog">
         <p class="tb-remarks">页面样式重构中...</p>
         <div class="tari-catalog">

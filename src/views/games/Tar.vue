@@ -157,7 +157,7 @@ export default {
       const live2DModel = this.live2DModel
 
       const msec = UtSystem.getUserTimeMSec()
-      const dt = msec - this.lastFrame
+      let dt = msec - this.lastFrame
       if (dt > 1500) {
         dt = 0
       }

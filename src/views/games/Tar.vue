@@ -5,6 +5,8 @@
       <p style="margin: 4px 0;">Eyes</p>
       <input type="range" min="0" max="1" step="any" v-model="eyeROpen">
       <input type="range" min="0" max="1" step="any" v-model="eyeLOpen">
+      <p style="margin: 4px 0;">Smile</p>
+      <input type="range" min="0" max="1" step="any" v-model="eyeSmile">
       <p style="margin: 4px 0;">Brow</p>
       <input type="range" min="-1" max="1" step="any" v-model="browAngle">
     </div>
@@ -53,6 +55,7 @@ export default {
       eyeBallY: 0,
       eyeBallXMoveTo: 0,
       eyeBallYMoveTo: 0,
+      eyeSmile: 0,
       browAngle: 0,
 
       blink: null,
@@ -185,12 +188,14 @@ export default {
       const t2 = msec / 1000 / 2.3 * Math.PI
       const t3 = msec / 1000 / 1.7 * Math.PI
 
-      live2DModel.setParamFloat('PARAM_ANGLE_X', 10 * Math.sin(t1))
-      live2DModel.setParamFloat('PARAM_ANGLE_Y', 20 * Math.sin(t2))
+      live2DModel.setParamFloat('PARAM_ANGLE_X', 8 * Math.sin(t1))
+      live2DModel.setParamFloat('PARAM_ANGLE_Y', 16 * Math.sin(t2))
       live2DModel.setParamFloat('PARAM_EYE_R_OPEN', this.eyeROpen * eyeOpenK)
       live2DModel.setParamFloat('PARAM_EYE_L_OPEN', this.eyeLOpen * eyeOpenK)
       live2DModel.setParamFloat('PARAM_EYE_BALL_X', this.eyeBallX)
       live2DModel.setParamFloat('PARAM_EYE_BALL_Y', this.eyeBallY)
+      live2DModel.setParamFloat('PARAM_EYE_R_SMILE', this.eyeSmile)
+      live2DModel.setParamFloat('PARAM_EYE_L_SMILE', this.eyeSmile)
       live2DModel.setParamFloat('PARAM_BROW_R_ANGLE', this.browAngle)
       // live2DModel.setParamFloat('PARAM_BROW_R_X', 0)
       // live2DModel.setParamFloat('PARAM_BROW_R_Y', 0)

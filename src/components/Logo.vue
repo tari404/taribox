@@ -29,6 +29,7 @@ export default {
   data () {
     return {
       raf: 0,
+      stvl: 0,
 
       angle: 45,
       offsetTop: 0,
@@ -38,7 +39,8 @@ export default {
         '零碎的想法',
         '没有明确需求的杂物',
         '有意思的东西'
-      ]
+      ],
+      charEls: []
     }
   },
   computed: {
@@ -53,20 +55,25 @@ export default {
   },
   mounted () {
     this.raf = requestAnimationFrame(this.update)
-    const chars = this.$el.querySelectorAll('.rotate-char')
-    chars.forEach(char => {
-      char.style.transform = `rotate(${Math.random() * 20 - 10}deg)`
-    })
+    this.charEls = this.$el.querySelectorAll('.rotate-char')
+    this.stvl = setInterval(this.updateCharsRotation, 3000)
+    this.updateCharsRotation()
   },
   methods: {
     update (time) {
       this.angle += this.step
       this.offsetTop = Math.sin(time / 500) * 10 + 10
       this.raf = requestAnimationFrame(this.update)
+    },
+    updateCharsRotation () {
+      this.charEls.forEach(el => {
+        el.style.transform = `rotate(${Math.random() * 20 - 10}deg)`
+      })
     }
   },
   beforeDestroy () {
     cancelAnimationFrame(this.raf)
+    clearInterval(this.stvl)
   }
 }
 </script>
@@ -118,5 +125,7 @@ export default {
     background-color #ffb81f
     transform rotate(45deg)
 .rotate-char
+  color #666
   display inline-block
+  transition transform 3s
 </style>

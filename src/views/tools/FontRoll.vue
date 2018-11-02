@@ -20,6 +20,9 @@ export default {
   },
   methods: {
     click () {
+      if (this.clicked) {
+        return
+      }
       this.clicked = true
       // eslint-disable-next-line
       eval(this.funcStr)

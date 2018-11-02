@@ -6,18 +6,14 @@
       </div>
     </div>
     <div class="flex-container">
-      <div v-if="showCatalog">
-        <p class="tb-remarks">页面样式重构中...</p>
-        <div class="tari-catalog">
-          <div>
-            <p class="tari-catalog-title">目录</p>
-            <ul>
-              <li v-for="(item, index) in catalog" :key="index">
-                <router-link :to="'/games/' + item.path">{{item.name}}</router-link>
-              </li>
-            </ul>
-          </div>
-        </div>
+      <div v-if="showCatalog" class="tari-catalog">
+        <search />
+        <ul>
+          <li v-for="(item, index) in catalog" :key="index">
+            <router-link :to="'/games/' + item.path" class="tari-catalog-title">{{item.title}}</router-link>
+            <p class="tari-catalog-intro">{{item.intro}}</p>
+          </li>
+        </ul>
       </div>
       <router-view v-else />
     </div>
@@ -26,6 +22,7 @@
 
 <script>
 import LogoSmall from '@/components/LogoSmall'
+import Search from '@/components/commons/Search'
 import catalog from './games/index.js'
 
 export default {
@@ -54,7 +51,8 @@ export default {
     }
   },
   components: {
-    LogoSmall
+    LogoSmall,
+    Search
   }
 }
 </script>

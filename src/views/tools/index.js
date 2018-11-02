@@ -14,6 +14,13 @@ export default [
     component: () => import(/* webpackChunkName: "tools" */ './Astar.vue')
   },
   {
+    name: 'FontRoll',
+    path: 'fontroll',
+    title: '文字翻滚脚本',
+    intro: '可以让页面中的文字翻滚！',
+    component: () => import(/* webpackChunkName: "tools" */ './FontRoll.vue')
+  },
+  {
     name: 'i18nTrans',
     path: 'i18n-trans',
     title: 'i18n的JSON文件翻译助手',

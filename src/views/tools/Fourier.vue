@@ -5,19 +5,30 @@
       <canvas id="g-source" width="140" height="140"></canvas>
       <canvas id="output" width="364" height="140"></canvas>
     </div>
-    <input type="range" min="0" :max="maxF" step="0.01" v-model="f">
+    <input type="range" min="0" :max="maxF" step="any" v-model="f">
     <input type="range" min="1" max="10" step="0.1" v-model="power">
   </div>
 </template>
 
 <script>
-const f = x => Math.sin(3 * x * Math.PI * 2 + 0.431)
+const A1 = Math.random() * 0.8 + 0.2
+const A2 = Math.random() * 0.8 + 0.2
+const A3 = Math.random() * 0.8 + 0.2
+const w1 = Math.random() * 7 + 1
+const w2 = Math.random() * 7 + 1
+const w3 = Math.random() * 7 + 1
+const p1 = Math.random() * Math.PI * 2
+const p2 = Math.random() * Math.PI * 2
+const p3 = Math.random() * Math.PI * 2
+const f = x => A1 * Math.sin(w1 * x * Math.PI * 2 + p1) +
+  A2 * Math.sin(w2 * x * Math.PI * 2 + p2) +
+  A3 * Math.sin(w3 * x * Math.PI * 2 + p3)
 
 export default {
   name: 'Fourier',
   data () {
     return {
-      maxF: 5,
+      maxF: 10,
       power: 6,
       f: 3,
       points: [],
@@ -36,7 +47,7 @@ export default {
   mounted () {
     const source = this.$el.querySelector('#f-source').getContext('2d')
     for (let x = 0; x < 512; x++) {
-      const y = f(x / 512) * 60 + 70
+      const y = f(x / 512) * 30 + 70
       source.fillRect(x - 0.5, 140 - y - 0.5, 1, 1)
     }
     this.updatePoints()
@@ -55,7 +66,7 @@ export default {
         }
         points.push({
           x: i,
-          y: Math.sqrt(x * x + y * y)
+          y: Math.sqrt(x * x + y * y) * 2
         })
       }
       this.points = points
@@ -68,14 +79,14 @@ export default {
       source2.fillStyle = 'red'
       source2.clearRect(0, 0, 140, 140)
       source2.beginPath()
-      source2.moveTo(f(0) * 60 + 70, 70)
+      source2.moveTo(f(0) * 30 + 70, 70)
       for (let i = 0; i < 512; i++) {
         const ii = i / 512 * this.power
         const x = f(ii) * Math.cos(-2 * Math.PI * ii * this.f)
         const y = -f(ii) * Math.sin(-2 * Math.PI * ii * this.f)
         sx += x / 512
         sy += y / 512
-        source2.lineTo(x * 60 + 70, 70 - y * 60)
+        source2.lineTo(x * 30 + 70, 70 - y * 30)
       }
       source2.stroke()
       source2.beginPath()
@@ -84,10 +95,11 @@ export default {
       source2.fill()
       const output = this.$el.querySelector('#output').getContext('2d')
       output.clearRect(0, 0, 364, 140)
+      output.beginPath()
       this.points.forEach(point => {
-        output.fillRect(point.x * 364 / this.maxF - 0.5, 70 - 60 * point.y - 0.5, 1, 1)
+        output.lineTo(point.x * 364 / this.maxF, 70 - 60 * point.y)
       })
-      output.lineWidth = 1
+      output.stroke()
       output.beginPath()
       output.moveTo(this.f * 364 / this.maxF, 0)
       output.lineTo(this.f * 364 / this.maxF, 140)

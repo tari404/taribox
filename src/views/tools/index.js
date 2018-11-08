@@ -21,6 +21,13 @@ export default [
     component: () => import(/* webpackChunkName: "tools" */ './FontRoll.vue')
   },
   {
+    name: 'Fourier',
+    path: 'fourier',
+    title: '傅立叶变化演示',
+    intro: '3Blue1Brown频道提供的超好理解的图形化解释，正在尝试在前端进行可交互的复现。',
+    component: () => import(/* webpackChunkName: "math" */ './Fourier.vue')
+  },
+  {
     name: 'i18nTrans',
     path: 'i18n-trans',
     title: 'i18n的JSON文件翻译助手',

@@ -6,6 +6,7 @@ import catalog from '@/views/tools/index.js'
 import gameCatalog from '@/views/games/index.js'
 import Tools from '@/views/Tools'
 import Games from '@/views/Games'
+import Whiteboard from '@/views/Whiteboard'
 
 Vue.use(Router)
 
@@ -39,6 +40,11 @@ export default new Router({
           component: item.component
         }
       })
+    },
+    {
+      path: '/whiteboard',
+      name: 'Whiteboard',
+      component: Whiteboard
     }
   ]
 })

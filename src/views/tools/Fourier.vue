@@ -1,12 +1,16 @@
 <template>
   <div>
     <div class="refresh" @click="refresh">刷新</div>
-    <div class="signal">
-      <p>C: {{C.toFixed(4)}}</p>
-      <p>A1: {{A1.toFixed(2)}}, ω1: {{w1.toFixed(6)}}, φ1: {{p1.toFixed(4)}}</p>
-      <p>A2: {{A2.toFixed(2)}}, ω2: {{w2.toFixed(6)}}, φ2: {{p2.toFixed(4)}}</p>
-      <p>A3: {{A3.toFixed(2)}}, ω3: {{w3.toFixed(6)}}, φ3: {{p3.toFixed(4)}}</p>
-    </div>
+    <ul class="signal">
+      <li>
+        <input type="checkbox" v-model="switches[0]">
+        <p>C: {{C.toFixed(4)}}</p>
+      </li>
+      <li v-for="n in 3" :key="n">
+        <input type="checkbox" v-model="switches[n]">
+        <p>A1: {{A[n - 1].toFixed(2)}}, ω1: {{w[n - 1].toFixed(6)}}, φ1: {{p[n - 1].toFixed(4)}}</p>
+      </li>
+    </ul>
     <div class="graph">
       <canvas id="g-source" width="284" height="284"></canvas>
       <div style="float: left;">
@@ -34,35 +38,23 @@
 </template>
 
 <script>
-const C = 0.5 - Math.random()
-const A1 = Math.random() * 0.8 + 0.2
-const A2 = Math.random() * 0.8 + 0.2
-const A3 = Math.random() * 0.8 + 0.2
-const w1 = Math.random() * 7 + 1
-const w2 = Math.random() * 7 + 1
-const w3 = Math.random() * 7 + 1
-const p1 = Math.random() * Math.PI * 2
-const p2 = Math.random() * Math.PI * 2
-const p3 = Math.random() * Math.PI * 2
-
 export default {
   name: 'Fourier',
   data () {
     return {
       maxF: 10,
-      power: 1,
+      power: 5,
       df: 3,
       ddf: 0,
       phi: 0,
       points: [],
       debounceTimer: 0,
+      switches: [true, true, true, true],
 
-      /* eslint-disable */
-      C,
-      A1, A2, A3,
-      w1, w2, w3,
-      p1, p2, p3
-      /* eslint-enable */
+      C: 0,
+      A: [1, 1, 1],
+      w: [1, 1, 1],
+      p: [0, 0, 0]
     }
   },
   computed: {
@@ -80,6 +72,10 @@ export default {
     power () {
       this.updatePoints()
       this.update()
+    },
+    switches () {
+      this.updatePoints()
+      this.update()
     }
   },
   created () {
@@ -92,19 +88,14 @@ export default {
   methods: {
     f (x) {
       const C = this.C
-      const A1 = this.A1
-      const A2 = this.A2
-      const A3 = this.A3
-      const w1 = this.w1
-      const w2 = this.w2
-      const w3 = this.w3
-      const p1 = this.p1
-      const p2 = this.p2
-      const p3 = this.p3
-      return x => C +
-        A1 * Math.cos(w1 * x * Math.PI * 2 + p1) +
-        A2 * Math.cos(w2 * x * Math.PI * 2 + p2) +
-        A3 * Math.cos(w3 * x * Math.PI * 2 + p3)
+      const [A1, A2, A3] = this.A
+      const [w1, w2, w3] = this.w
+      const [p1, p2, p3] = this.p
+      const [s0, s1, s2, s3] = this.switches
+      return x => (s0 ? C : 0) +
+        (s1 ? A1 * Math.cos(w1 * x * Math.PI * 2 + p1) : 0) +
+        (s2 ? A2 * Math.cos(w2 * x * Math.PI * 2 + p2) : 0) +
+        (s3 ? A3 * Math.cos(w3 * x * Math.PI * 2 + p3) : 0)
     },
     refresh () {
       this.updateInput()
@@ -113,15 +104,11 @@ export default {
     },
     updateInput () {
       this.C = 0.5 - Math.random()
-      this.A1 = Math.random() * 0.8 + 0.2
-      this.A2 = Math.random() * 0.8 + 0.2
-      this.A3 = Math.random() * 0.8 + 0.2
-      this.w1 = Math.random() * 7 + 1
-      this.w2 = Math.random() * 7 + 1
-      this.w3 = Math.random() * 7 + 1
-      this.p1 = Math.random() * Math.PI * 2
-      this.p2 = Math.random() * Math.PI * 2
-      this.p3 = Math.random() * Math.PI * 2
+      for (let i = 0; i < 3; i++) {
+        this.A[i] = Math.random() * 0.6 + 0.4
+        this.w[i] = Math.random() * 7 + 1
+        this.p[i] = Math.random() * Math.PI * 2
+      }
     },
     updatePoints () {
       const points = []
@@ -144,13 +131,14 @@ export default {
     update () {
       const f = this.f()
       const sdf = this.sdf
-      const phi = this.phi / 2 / Math.PI
+      const phi = this.phi
       const source = this.$el.querySelector('#f-source').getContext('2d')
       source.clearRect(0, 0, 512, 140)
       source.beginPath()
-      source.moveTo(0, 70 - f(-phi) * 60)
+      const dx = phi / 2 / Math.PI / sdf
+      source.moveTo(0, 70 - f(-dx) * 20)
       for (let x = 0; x < 512; x++) {
-        const y = f(x / 512 - phi) * 60 + 70
+        const y = f(x / 512 - dx) * 20 + 70
         source.lineTo(x, 140 - y)
       }
       source.strokeStyle = 'black'
@@ -171,11 +159,11 @@ export default {
       source2.strokeStyle = '#0003'
       source2.clearRect(0, 0, 284, 284)
       source2.beginPath()
-      source2.moveTo(142 + f(0) * 60 * Math.cos(-this.phi), 142 - f(0) * 60 * Math.sin(-this.phi))
+      source2.moveTo(142 + f(0) * 60 * Math.cos(-phi), 142 - f(0) * 60 * Math.sin(-phi))
       for (let i = 0; i < 512 * this.power; i++) {
         const ii = i / 512
-        const x = f(ii) * Math.cos(-2 * Math.PI * ii * sdf - this.phi)
-        const y = f(ii) * Math.sin(-2 * Math.PI * ii * sdf - this.phi)
+        const x = f(ii) * Math.cos(-2 * Math.PI * ii * sdf - phi)
+        const y = f(ii) * Math.sin(-2 * Math.PI * ii * sdf - phi)
         sx += x / 512
         sy += y / 512
         source2.lineTo(x * 60 + 142, 142 - y * 60)
@@ -222,12 +210,21 @@ export default {
   cursor pointer
 .signal
   float right
+  margin 0
+  padding 0
   font-size 12px
   line-height 18px
   font-family monospace
   text-align right
+  li
+    display flex
+    flex-direction row-reverse
   p
+    flex 0 0 auto
     margin 0
+  input
+    flex 0 0 12px
+    margin 3px
 #f-source
   border solid 1px #333
   display block

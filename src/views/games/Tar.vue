@@ -92,14 +92,18 @@ export default {
 
     const texture0 = new Image()
     const texture1 = new Image()
+    const texture2 = new Image()
     texture0.src = require('@/assets/live2d/tar.2048/texture_00.png')
     texture1.src = require('@/assets/live2d/tar.2048/texture_01.png')
+    texture2.src = require('@/assets/live2d/tar.2048/texture_02.png')
     Promise.all([
       new Promise((resolve, reject) => { texture0.onload = resolve }),
-      new Promise((resolve, reject) => { texture1.onload = resolve })
+      new Promise((resolve, reject) => { texture1.onload = resolve }),
+      new Promise((resolve, reject) => { texture2.onload = resolve })
     ]).then(res => {
       live2DModel.setTexture(0, this.createTexture(texture0))
       live2DModel.setTexture(1, this.createTexture(texture1))
+      live2DModel.setTexture(2, this.createTexture(texture2))
       this.lastFrame = UtSystem.getUserTimeMSec()
       this.raf = requestAnimationFrame(this.render)
     })

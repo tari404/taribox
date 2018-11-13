@@ -1,81 +1,52 @@
 <template>
   <div class="center">
-    <canvas width="400" height="400" id="test" />
+    <canvas width="500" height="500" />
   </div>
 </template>
 
 <script>
-class Point {
-  constructor (x, y) {
-    this.x = x
-    this.y = y
-  }
-}
-const distance = (p1, p2) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
-const hslToRgb = (h, s, l) => {
-  var r, g, b
-  if (s === 0) {
-    r = g = b = l
-  } else {
-    const hue2rgb = (p, q, t) => {
-      if (t < 0) t += 1
-      if (t > 1) t -= 1
-      if (t < 1 / 6) return p + (q - p) * 6 * t
-      if (t < 1 / 2) return q
-      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6
-      return p
-    }
-
-    var q = l < 0.5 ? l * (1 + s) : l + s - l * s
-    var p = 2 * l - q
-
-    r = hue2rgb(p, q, h + 1 / 3)
-    g = hue2rgb(p, q, h)
-    b = hue2rgb(p, q, h - 1 / 3)
-  }
-
-  return [ r * 255, g * 255, b * 255 ]
-}
-
 export default {
   name: 'Whiteboard',
+  data () {
+    return {
+      raf: 0,
+      i: 0
+    }
+  },
   mounted () {
-    const canvas = this.$el.querySelector('#test')
-    const ctx = canvas.getContext('2d')
-    const points = []
-    for (let i = 0; i < 3; i++) {
-      points.push(new Point(Math.random() * 200 - 100, Math.random() * 200 - 100))
-    }
-    const cW = canvas.width / 2
-    const cH = canvas.height / 2
-    for (let i = 0; i <= canvas.width; i++) {
-      for (let j = 0; j <= canvas.height; j++) {
-        const disSum = points.reduce((sum, p) => {
-          return sum + distance(p, new Point(i - cW, cH - j))
-        }, 0)
-        if (disSum > 400 && disSum < 402) {
-          ctx.globalAlpha = 1 - Math.pow((401 - disSum) / 1, 2)
-          ctx.fillRect(i - 0.5, j - 0.5, 1, 1)
-        }
+    const ctx = this.$el.querySelector('canvas').getContext('2d')
+    ctx.fillRect(0, 0, 500, 500)
+    this.ctx = ctx
+    this.raf = requestAnimationFrame(this.render)
+  },
+  methods: {
+    render () {
+      this.i++
+      const ctx = this.ctx
+      for (let i = this.i; i < this.i + 1; i += 0.02) {
+        const r = (0.5 + Math.sin(i * 0.131 + 1.231) + Math.sin(i * 0.713 + 0.123)) * 100
+        const x = 250 - r * Math.sin(i * 0.0939711)
+        const y = 250 - r * Math.cos(i * 0.0939711)
+        ctx.globalAlpha = 0.002
+        ctx.fillStyle = '#000'
+        ctx.fillRect(0, 0, 500, 500)
+        ctx.globalAlpha = 1
+        ctx.fillStyle = '#eef'
+        ctx.fillRect(x - 0.5, y - 0.5, 1, 1)
       }
+      this.raf = requestAnimationFrame(this.render)
     }
-    ctx.globalAlpha = 1
-    points.forEach(p => {
-      ctx.beginPath()
-      ctx.arc(cW + p.x, cH - p.y, 3, 0, Math.PI * 2)
-      ctx.closePath()
-      ctx.fill()
-    })
+  },
+  beforeDestroy () {
+    cancelAnimationFrame(this.raf)
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-.center
+canvas
   position fixed
   top 50%
   left 50%
   transform translate3d(-50%, -50%, 0)
-#test
-  border solid 1px #ddd
 </style>

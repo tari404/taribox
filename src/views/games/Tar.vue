@@ -192,8 +192,8 @@ export default {
       const t2 = msec / 1000 / 2.3 * Math.PI
       const t3 = msec / 1000 / 1.7 * Math.PI
 
-      live2DModel.setParamFloat('PARAM_ANGLE_X', 8 * Math.sin(t1))
-      live2DModel.setParamFloat('PARAM_ANGLE_Y', 16 * Math.sin(t2))
+      live2DModel.setParamFloat('PARAM_ANGLE_X', 4 * Math.sin(t1) + this.eyeBallX * 20)
+      live2DModel.setParamFloat('PARAM_ANGLE_Y', 4 * Math.sin(t2) + this.eyeBallY * 20)
       live2DModel.setParamFloat('PARAM_EYE_R_OPEN', this.eyeROpen * eyeOpenK)
       live2DModel.setParamFloat('PARAM_EYE_L_OPEN', this.eyeLOpen * eyeOpenK)
       live2DModel.setParamFloat('PARAM_EYE_BALL_X', this.eyeBallX)

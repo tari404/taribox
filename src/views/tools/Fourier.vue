@@ -10,11 +10,11 @@
       </div>
       <ul class="signal">
         <li>
-          <input :disabled="drawing" type="checkbox" v-model="switches[0]">
+          <input :disabled="drawing || custom" type="checkbox" v-model="switches[0]">
           <p>C: {{C.toFixed(4)}}</p>
         </li>
         <li v-for="n in 3" :key="n">
-          <input :disabled="drawing" type="checkbox" v-model="switches[n]">
+          <input :disabled="drawing || custom" type="checkbox" v-model="switches[n]">
           <p>A1: {{A[n - 1].toFixed(2)}}, ω1: {{w[n - 1].toFixed(6)}}, φ1: {{p[n - 1].toFixed(4)}}</p>
         </li>
       </ul>
@@ -117,7 +117,7 @@ export default {
     this.update()
   },
   methods: {
-    f (x) {
+    f () {
       if (this.custom) {
         const s = this.customSignal
         return x => {

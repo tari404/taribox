@@ -1,5 +1,3 @@
-#version 300 es
-
 precision highp float;
 precision mediump sampler3D;
 
@@ -26,6 +24,7 @@ const float shininess = 40.0;
 
 void cast_mip(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray);
 void cast_iso(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray);
+void cast_sli(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray);
 
 float sample1(vec3 texcoords);
 vec4 apply_colormap(float val);
@@ -56,8 +55,9 @@ void main() {
 
   // Decide how many steps to take
   int nsteps = int(-distance / relative_step_size + 0.5);
-  if ( nsteps < 1 )
-      discard;
+  if ( nsteps < 1 ) {
+    discard;
+  }
 
   // Get starting location and step vector in texture coordinates
   vec3 step = ((v_position - front) / u_size) / float(nsteps);
@@ -68,13 +68,17 @@ void main() {
   //gl_FragColor = vec4(0.0, float(nsteps) / 1.0 / u_size.x, 1.0, 1.0);
   //return;
 
-  if (u_renderstyle == 0)
-      cast_mip(start_loc, step, nsteps, view_ray);
-  else if (u_renderstyle == 1)
-      cast_iso(start_loc, step, nsteps, view_ray);
+  if (u_renderstyle == 0) {
+    cast_mip(start_loc, step, nsteps, view_ray);
+  } else if (u_renderstyle == 1) {
+    cast_iso(start_loc, step, nsteps, view_ray);
+  } else if (u_renderstyle == 2) {
+    cast_sli(start_loc, step, nsteps, view_ray);
+  }
 
-  if (gl_FragColor.a < 0.05)
-      discard;
+  if (gl_FragColor.r < 0.05) {
+    discard;
+  }
 }
 
 
@@ -89,7 +93,6 @@ vec4 apply_colormap(float val) {
 }
 
 void cast_mip(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray) {
-
   float max_val = -1e6;
   int max_i = 100;
   vec3 loc = start_loc;
@@ -136,8 +139,9 @@ void cast_iso(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray) {
   // non-constant expression. So we use a hard-coded max, and an additional condition
   // inside the loop.
   for (int iter=0; iter<MAX_STEPS; iter++) {
-    if (iter >= nsteps)
+    if (iter >= nsteps) {
       break;
+    }
 
         // Sample from the 3D texture
     float val = sample1(loc);
@@ -161,8 +165,50 @@ void cast_iso(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray) {
   }
 }
 
+void cast_sli(vec3 start_loc, vec3 step, int nsteps, vec3 view_ray) {
+  float max_val = -1e6;
+  float slice_val = -0.001;
+  int max_i = 100;
+  vec3 end_loc = start_loc + float(nsteps) * step;
+  vec3 loc = end_loc;
 
-vec4 add_lighting(float val, vec3 loc, vec3 step, vec3 view_ray) {
+  // Enter the raycasting loop. In WebGL 1 the loop index cannot be compared with
+  // non-constant expression. So we use a hard-coded max, and an additional condition
+  // inside the loop.
+  for (int iter=0; iter<MAX_STEPS; iter++) {
+    if (iter >= nsteps)
+      break;
+    // Sample from the 3D texture
+    float val = sample1(loc);
+    // Apply MIP operation
+    if (val > max_val) {
+      max_val = val;
+      max_i = iter;
+    }
+    if (loc.y < u_renderthreshold + 0.002 && loc.y > u_renderthreshold - 0.002 && slice_val < 0.00) {
+      slice_val = val;
+    }
+    // Advance location deeper into the volume
+    loc -= step;
+  }
+
+  // Refine location, gives crispier images
+  vec3 iloc = start_loc + step * (float(max_i) - 0.5);
+  vec3 istep = step / float(REFINEMENT_STEPS);
+  for (int i=0; i<REFINEMENT_STEPS; i++) {
+    max_val = max(max_val, sample1(iloc));
+    iloc += istep;
+  }
+
+  if (slice_val < 0.03) {
+    slice_val = 0.0;
+  }
+
+  // Resolve final color
+  gl_FragColor = apply_colormap(max_val * 0.7 + slice_val);
+}
+
+vec4 add_lighting(float val, vec3 loc, vec3 step, vec3 view_ray) {
   // Calculate color by incorporating lighting
 
   // View direction

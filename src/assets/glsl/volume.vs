@@ -1,5 +1,3 @@
-#version 300 es
-
 varying vec4 v_nearpos;
 varying vec4 v_farpos;
 varying vec3 v_position;

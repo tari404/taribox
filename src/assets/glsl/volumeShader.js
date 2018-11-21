@@ -9,7 +9,7 @@ import * as THREE from 'three'
 import vs from './volume.vs'
 import fs from './volume.fs'
 
-export const volumeShader = {
+export default {
   uniforms: {
     'u_size': { value: new THREE.Vector3(1, 1, 1) },
     'u_renderstyle': { value: 0 },

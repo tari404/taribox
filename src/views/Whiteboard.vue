@@ -1,48 +1,38 @@
 <template>
   <div class="center">
+    <input type="range" min="0" max="1" step="any" v-model="threshold" disabled>
   </div>
 </template>
 
 <script>
 import * as THREE from 'three'
+import OrbitControls from 'three-orbitcontrols'
 import JSZip from 'jszip'
+import shader from '@/assets/glsl/volumeShader'
 
 const scene = new THREE.Scene()
 const canvas = document.createElement('canvas')
+canvas.style.background = '#110015'
 const ctx = canvas.getContext('webgl2')
 const renderer = new THREE.WebGLRenderer({ canvas, context: ctx })
-const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
+// const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
+const h = 300
+const aspect = innerWidth / innerHeight
+const camera = new THREE.OrthographicCamera(-h * aspect / 2, h * aspect / 2, h / 2, -h / 2, 0.1, 1000)
+camera.position.set(0, 0, 300)
+camera.up.set(0, -1, 0)
 
-const vs = `
-#version 300 es
-uniform float depth;
-uniform vec2 size;
-out vec3 vUv;
-void main() {
-  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-  // Convert position.xy to 1.0-0.0
-  vUv.xy = position.xy / size + 0.5;
-  vUv.y = 1.0 - vUv.y; // original data is upside down
-  vUv.z = depth;
+function updateCamera () {
+  const aspect = innerWidth / innerHeight
+  const h = camera.top
+  camera.left = -h * aspect
+  camera.right = h * aspect
+  camera.updateProjectionMatrix()
+  renderer.setSize(innerWidth, innerHeight)
 }
-`
+window.addEventListener('resize', updateCamera)
 
-const fs = `
-#version 300 es
-precision highp float;
-precision highp int;
-precision highp sampler3D;
-uniform sampler3D diffuse;
-in vec3 vUv;
-out vec4 out_FragColor;
-void main() {
-  vec4 color = texture( diffuse, vUv );
-  // lighten a bit
-  out_FragColor = vec4( color.rrr * 1.5, 1.0 );
-}
-`
-
-const depth = { value: 0 }
+const renderthreshold = { value: 0.5 }
 
 new THREE.FileLoader()
   .setResponseType('arraybuffer')
@@ -55,18 +45,34 @@ new THREE.FileLoader()
     texture.type = THREE.UnsignedByteType
     texture.minFilter = texture.magFilter = THREE.LinearFilter
     texture.needsUpdate = true
+
+    const gray = new THREE.TextureLoader().load(require('@/assets/cm_viridis.png'))
+
+    const uniforms = THREE.UniformsUtils.clone(shader.uniforms)
+    uniforms.u_data.value = texture
+    uniforms.u_size.value.set(256, 256, 140)
+    uniforms.u_clim.value.set(0.01, 0.9)
+    uniforms.u_renderstyle.value = 2
+    uniforms.u_renderthreshold = renderthreshold
+    uniforms.u_cmdata.value = gray
+
     const material = new THREE.ShaderMaterial({
-      uniforms: {
-        diffuse: { value: texture },
-        depth,
-        size: { value: new THREE.Vector2(3, 3) }
-      },
-      vertexShader: vs,
-      fragmentShader: fs
+      uniforms,
+      vertexShader: shader.vertexShader,
+      fragmentShader: shader.fragmentShader,
+      side: THREE.BackSide
     })
-    const geometry = new THREE.PlaneBufferGeometry(3, 3)
+
+    const geometry = new THREE.BoxBufferGeometry(256, 256, 140)
+    geometry.translate(256 / 2, 256 / 2, 140 / 2)
     const mesh = new THREE.Mesh(geometry, material)
+    mesh.position.set(-256 / 2, -256 / 2, -140 / 2)
     scene.add(mesh)
+
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.minZoom = 0.5
+    controls.maxZoom = 4
+    controls.update()
   })
 
 export default {
@@ -75,34 +81,25 @@ export default {
     return {
       raf: 0,
 
-      depth,
-      depthStep: 1 / (109 * 3)
+      threshold: '0.5',
+      renderthreshold
     }
   },
   mounted () {
-    camera.aspect = innerWidth / innerHeight
-    camera.updateProjectionMatrix()
     renderer.setSize(innerWidth, innerHeight)
     this.$el.appendChild(renderer.domElement)
 
-    camera.position.z = 5
-
     this.raf = requestAnimationFrame(this.render)
+  },
+  watch: {
+    threshold (value) {
+      this.renderthreshold.value = Number(value)
+    }
   },
   methods: {
     render (timer) {
-      let value = this.depth.value
-      value += this.depthStep
-      if (value > 1.0 || value < -1.0) {
-        if (value > 1.0) {
-          value = 2.0 - value
-        }
-        if (value < -1.0) {
-          value = -2.0 - value
-        }
-        this.depthStep = -this.depthStep
-      }
-      this.depth.value = value
+      const threshold = timer / 5000 % 1
+      this.threshold = threshold.toString()
 
       renderer.render(scene, camera)
 
@@ -123,6 +120,9 @@ export default {
   align-items center
   width 100%
   height 100%
-canvas
-  background-color #000
+input
+  position fixed
+  bottom 40px
+  left 50%
+  transform translateX(-50%)
 </style>

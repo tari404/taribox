@@ -17,6 +17,7 @@
     "color-convert": "^1.9.3",
     "jszip": "^3.1.5",
     "three": "^0.98.0",
+    "three-gltf-loader": "^1.98.0",
     "three-orbitcontrols": "^2.96.3",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
@@ -27,10 +28,10 @@
     "@vue/cli-plugin-eslint": "^3.0.0",
     "@vue/cli-service": "^3.0.0",
     "@vue/eslint-config-standard": "^3.0.1",
+    "file-loader": "^2.0.0",
     "raw-loader": "^0.5.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
-    "url-loader": "^1.1.2",
     "vue-template-compiler": "^2.5.17"
   },
   "eslintConfig": {

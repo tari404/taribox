@@ -7,10 +7,10 @@ module.exports = {
       .loader('arraybuffer-loader')
       .end()
     config.module
-      .rule('zip')
-      .test(/\.zip$/)
-      .use('url-loader')
-      .loader('url-loader')
+      .rule('file')
+      .test(/\.(zip|gltf)$/)
+      .use('file-loader')
+      .loader('file-loader')
       .end()
     config.module
       .rule('raw')

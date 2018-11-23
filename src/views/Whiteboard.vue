@@ -1,91 +1,100 @@
 <template>
   <div class="center">
-    <input type="range" min="0" max="1" step="any" v-model="threshold" disabled>
   </div>
 </template>
 
 <script>
 import * as THREE from 'three'
 import OrbitControls from 'three-orbitcontrols'
-import JSZip from 'jszip'
-import shader from '@/assets/glsl/volumeShader'
+import GLTFLoader from 'three-gltf-loader'
 
 const scene = new THREE.Scene()
 const canvas = document.createElement('canvas')
-canvas.style.background = '#110015'
-const ctx = canvas.getContext('webgl2')
+canvas.style.backgroundColor = '#fff'
+const ctx = canvas.getContext('webgl')
 const renderer = new THREE.WebGLRenderer({ canvas, context: ctx })
-// const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
-const h = 300
+renderer.gammaFactor = 2.2
+renderer.gammaOutput = true
 const aspect = innerWidth / innerHeight
-const camera = new THREE.OrthographicCamera(-h * aspect / 2, h * aspect / 2, h / 2, -h / 2, 0.1, 1000)
-camera.position.set(0, 0, 300)
-camera.up.set(0, -1, 0)
+const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000)
+// const h = 200
+// const camera = new THREE.OrthographicCamera(-h * aspect / 2, h * aspect / 2, h / 2, -h / 2, 0.1, 1000)
+camera.position.set(0, 200, 280)
+camera.lookAt(0, 80, 0)
+camera.up.set(0, 1, 0)
 
 function updateCamera () {
   const aspect = innerWidth / innerHeight
-  const h = camera.top
-  camera.left = -h * aspect
-  camera.right = h * aspect
+  // const h = camera.top
+  // camera.left = -h * aspect
+  // camera.right = h * aspect
+  camera.aspect = aspect
   camera.updateProjectionMatrix()
   renderer.setSize(innerWidth, innerHeight)
 }
-window.addEventListener('resize', updateCamera)
 
-const renderthreshold = { value: 0.5 }
+const gX = new THREE.Geometry()
+gX.vertices.push(new THREE.Vector3(0, 0, 0))
+gX.vertices.push(new THREE.Vector3(6, 0, 0))
+const gY = new THREE.Geometry()
+gY.vertices.push(new THREE.Vector3(0, 0, 0))
+gY.vertices.push(new THREE.Vector3(0, 6, 0))
+const gZ = new THREE.Geometry()
+gZ.vertices.push(new THREE.Vector3(0, 0, 0))
+gZ.vertices.push(new THREE.Vector3(0, 0, 6))
 
-new THREE.FileLoader()
-  .setResponseType('arraybuffer')
-  .load(require('../../static/head256x256x109.zip'), async data => {
-    const zip = new JSZip()
-    const jszip = await zip.loadAsync(data)
-    const array = await jszip.files['head256x256x109'].async('uint8array')
-    const texture = new THREE.DataTexture3D(array, 256, 256, 109)
-    texture.format = THREE.RedFormat
-    texture.type = THREE.UnsignedByteType
-    texture.minFilter = texture.magFilter = THREE.LinearFilter
-    texture.needsUpdate = true
+const lineX = new THREE.Line(gX, new THREE.LineBasicMaterial({ color: 0xff0000 }))
+const lineY = new THREE.Line(gY, new THREE.LineBasicMaterial({ color: 0x00ff00 }))
+const lineZ = new THREE.Line(gZ, new THREE.LineBasicMaterial({ color: 0x0000ff }))
 
-    const gray = new THREE.TextureLoader().load(require('@/assets/cm_viridis.png'))
+const sphere = new THREE.SphereBufferGeometry(1, 16, 8)
 
-    const uniforms = THREE.UniformsUtils.clone(shader.uniforms)
-    uniforms.u_data.value = texture
-    uniforms.u_size.value.set(256, 256, 140)
-    uniforms.u_clim.value.set(0.01, 0.9)
-    uniforms.u_renderstyle.value = 2
-    uniforms.u_renderthreshold = renderthreshold
-    uniforms.u_cmdata.value = gray
+const envlight = new THREE.HemisphereLight(0xffffff, 0xbbbbdd, 1)
+// const light = new THREE.PointLight(0xffffff, 0.6, 1000)
+// light.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0xff0040 })))
+// light.position.set(30, 180, 200)
+// const dirLight = new THREE.DirectionalLight(0xffffff, 0.5)
+// dirLight.position.set(0, 0, 1)
 
-    const material = new THREE.ShaderMaterial({
-      uniforms,
-      vertexShader: shader.vertexShader,
-      fragmentShader: shader.fragmentShader,
-      side: THREE.BackSide
-    })
+const white = require('@/assets/white.png')
+const map = new Array(6).fill(white)
+var envMap = new THREE.CubeTextureLoader().load(map)
 
-    const geometry = new THREE.BoxBufferGeometry(256, 256, 140)
-    geometry.translate(256 / 2, 256 / 2, 140 / 2)
-    const mesh = new THREE.Mesh(geometry, material)
-    mesh.position.set(-256 / 2, -256 / 2, -140 / 2)
-    scene.add(mesh)
-
-    const controls = new OrbitControls(camera, renderer.domElement)
-    controls.minZoom = 0.5
-    controls.maxZoom = 4
-    controls.update()
+const loader = new GLTFLoader()
+loader.load(`${process.env.BASE_URL}2B/scene.gltf`, gltf => {
+  gltf.scene.traverse(child => {
+    if (child.isMesh) {
+      child.material.envMap = envMap
+      child.material.envMapIntensity = 0.3
+    }
   })
+  scene.add(gltf.scene)
+}, undefined, console.warn)
+
+scene.add(lineX)
+scene.add(lineY)
+scene.add(lineZ)
+
+scene.add(envlight)
+// scene.add(light)
+// scene.add(dirLight)
+
+const controls = new OrbitControls(camera, canvas)
+controls.target = new THREE.Vector3(0, 80, 0)
+controls.minZoom = 0.5
+controls.maxZoom = 4
+controls.update()
 
 export default {
   name: 'Whiteboard',
   data () {
     return {
-      raf: 0,
-
-      threshold: '0.5',
-      renderthreshold
+      raf: 0
     }
   },
   mounted () {
+    window.addEventListener('resize', updateCamera)
+
     renderer.setSize(innerWidth, innerHeight)
     this.$el.appendChild(renderer.domElement)
 
@@ -107,6 +116,7 @@ export default {
     }
   },
   beforeDestroy () {
+    window.removeEventListener('resize', updateCamera)
     cancelAnimationFrame(this.raf)
   }
 }

@@ -7,12 +7,6 @@ module.exports = {
       .loader('arraybuffer-loader')
       .end()
     config.module
-      .rule('file')
-      .test(/\.(zip|gltf)$/)
-      .use('file-loader')
-      .loader('file-loader')
-      .end()
-    config.module
       .rule('raw')
       .test(/\.(vs|fs|glsl)(\?.*)?$/)
       .use('raw-loader')

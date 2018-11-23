@@ -36,7 +36,7 @@ const renderthreshold = { value: 0.5 }
 
 new THREE.FileLoader()
   .setResponseType('arraybuffer')
-  .load(require('../../static/head256x256x109.zip'), async data => {
+  .load(`${process.env.BASE_URL}head256x256x109.zip`, async data => {
     const zip = new JSZip()
     const jszip = await zip.loadAsync(data)
     const array = await jszip.files['head256x256x109'].async('uint8array')

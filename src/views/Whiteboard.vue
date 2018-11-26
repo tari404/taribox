@@ -13,8 +13,8 @@ const canvas = document.createElement('canvas')
 canvas.style.backgroundColor = '#fff'
 const ctx = canvas.getContext('webgl')
 const renderer = new THREE.WebGLRenderer({ canvas, context: ctx })
-renderer.gammaFactor = 2.2
-renderer.gammaOutput = true
+// renderer.gammaFactor = 2.2
+// renderer.gammaOutput = true
 const aspect = innerWidth / innerHeight
 const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000)
 // const h = 200
@@ -47,8 +47,6 @@ const lineX = new THREE.Line(gX, new THREE.LineBasicMaterial({ color: 0xff0000 }
 const lineY = new THREE.Line(gY, new THREE.LineBasicMaterial({ color: 0x00ff00 }))
 const lineZ = new THREE.Line(gZ, new THREE.LineBasicMaterial({ color: 0x0000ff }))
 
-const sphere = new THREE.SphereBufferGeometry(1, 16, 8)
-
 const envlight = new THREE.HemisphereLight(0xffffff, 0xbbbbdd, 1)
 // const light = new THREE.PointLight(0xffffff, 0.6, 1000)
 // light.add(new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({ color: 0xff0040 })))
@@ -60,12 +58,41 @@ const white = require('@/assets/white.png')
 const map = new Array(6).fill(white)
 var envMap = new THREE.CubeTextureLoader().load(map)
 
+window.THREE = THREE
+
+const standardShader = THREE.ShaderLib['standard']
+const myMaterial = new THREE.ShaderMaterial({
+  vertexShader: standardShader.vertexShader,
+  fragmentShader: standardShader.fragmentShader,
+  uniforms: standardShader.uniforms,
+  lights: true,
+  defines: {
+    USE_MAP: true,
+    USE_ENVMAP: true,
+    ENVMAP_TYPE_CUBE: true
+  }
+})
+// const myMaterial = new THREE.MeshStandardMaterial({
+//   color: 0xff0000,
+//   envMap,
+//   envMapIntensity: 0.3
+// })
+
 const loader = new GLTFLoader()
 loader.load(`${process.env.BASE_URL}2B/scene.gltf`, gltf => {
   gltf.scene.traverse(child => {
     if (child.isMesh) {
-      child.material.envMap = envMap
-      child.material.envMapIntensity = 0.3
+      // child.material.envMap = envMap
+      // child.material.envMapIntensity = 0.3
+      const temp = child.material
+      child.material = myMaterial.clone()
+      for (const key in child.material.uniforms) {
+        if (temp.hasOwnProperty(key)) {
+          child.material.uniforms[key].value = temp[key]
+        }
+      }
+      child.material.uniforms['envMap'].value = envMap
+      child.material.uniforms['envMapIntensity'].value = 0.5
     }
   })
   scene.add(gltf.scene)

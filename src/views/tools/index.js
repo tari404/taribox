@@ -28,6 +28,13 @@ export default [
     component: () => import(/* webpackChunkName: "math" */ './Fourier.vue')
   },
   {
+    name: 'Three',
+    path: 'three',
+    title: 'Three.js研究',
+    intro: '正在用于研究three.js及webgl的空白页面。',
+    component: () => import(/* webpackChunkName: "webgl" */ './Three.vue')
+  },
+  {
     name: 'i18nTrans',
     path: 'i18n-trans',
     title: 'i18n的JSON文件翻译助手',

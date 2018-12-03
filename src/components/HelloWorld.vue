@@ -6,7 +6,7 @@
       <br>
       或者一些<router-link to="games">小游戏</router-link>
     </p>
-    <a target="_blank" href="https://github.com/existencer/taribox">GitHub</a>
+    <a target="_blank" href="https://github.com/tari404/taribox">GitHub</a>
   </div>
 </template>
 

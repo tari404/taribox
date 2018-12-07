@@ -14,6 +14,13 @@ export default [
     component: () => import(/* webpackChunkName: "tools" */ './Astar.vue')
   },
   {
+    name: 'Audio',
+    path: 'audio',
+    title: '前端音频处理实验',
+    intro: '尝试前端对于音频信息处理的demo。',
+    component: () => import(/* webpackChunkName: "math" */ './Audio.vue')
+  },
+  {
     name: 'FontRoll',
     path: 'fontroll',
     title: '文字翻滚脚本',

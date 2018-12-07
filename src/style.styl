@@ -4,6 +4,7 @@
   background-color #ff9b1f
   transition .8s
   position relative
+  z-index 100
 .tari-logo
   width 100px
   height 100px
@@ -40,6 +41,13 @@
     margin 4px 0
     padding 0
     text-align left
+    max-height 70vh
+    overflow-y scroll
+  ul::-webkit-scrollbar
+    display none
+    width 0
+    height 0
+    opacity 0
   li
     list-style none
     margin 20px 0

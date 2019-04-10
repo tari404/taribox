@@ -10,6 +10,10 @@
       重置<br>
       Reset
     </div>
+    <div id="i18nt-reset" class="i18nt-button" @click="save">
+      保存<br>
+      Save
+    </div>
     <div id="i18nt-download" class="i18nt-button" @click="download">
       下载翻译结果<br>
       Download translated files
@@ -43,6 +47,19 @@ export default {
   mounted () {
     this.dropBox = this.$el.querySelector('#i18nt-file')
     this.inputBox = this.$el.querySelector('#i18nt-box')
+    const isSave = localStorage.getItem('isSave')
+    if(isSave) {
+      const protoObject =  localStorage.getItem('protoObject')
+      const outputObject =  localStorage.getItem('outputObject')
+      try {
+        this.protoObject = JSON.parse(protoObject)
+        this.outputObject = JSON.parse(outputObject)
+      } catch (err) {
+        this.reset()
+        alert('解析失败，请向技术人员确认文件是否损坏')
+      }
+      this.parseInputBox(this.outputObject, 0, this.protoObject)
+    }
   },
   methods: {
     onDropFile (e) {
@@ -65,10 +82,15 @@ export default {
         alert('没有选择文件')
       }
     },
-    parseInputBox (obj, level) {
+    parseInputBox (obj, level, protoObject = false) {
       for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
           const value = obj[key]
+          let protoValue ;
+          if (protoObject) {
+            protoValue = protoObject[key]
+          }
+
           if (typeof value === 'string') {
             const tr = document.createElement('tr')
             tr.className = 'level-' + Math.min(level, 7)
@@ -77,22 +99,28 @@ export default {
             tdKey.innerHTML = key
             const tdValue = document.createElement('td')
             tdValue.className = 'value'
-            tdValue.innerHTML = value
+            tdValue.innerHTML = protoObject ? protoValue : value
             const tdInput = document.createElement('td')
             tdInput.setAttribute('contenteditable', 'plaintext-only')
             tdInput.className = 'input'
+            if(protoObject) {
+              if(protoValue !== value) {
+                tdInput.innerText = value
+              }
+            }
             tdInput.addEventListener('blur', e => {
               const text = e.target.innerText
               if (text.replace(/\s*/g, '').length !== 0) {
                 obj[key] = text.replace(/(^\s*)|(\s*$)|(\s*\n\s*)/g, '')
               }
+
             })
             tr.appendChild(tdKey)
             tr.appendChild(tdValue)
             tr.appendChild(tdInput)
             this.inputBox.appendChild(tr)
           } else if (typeof value === 'object') {
-            this.parseInputBox(value, level + 1)
+            this.parseInputBox(value, level + 1, protoValue)
           }
         }
       }
@@ -110,11 +138,23 @@ export default {
       eleLink.click()
       document.body.removeChild(eleLink)
     },
+    save () {
+      const protoObject = JSON.stringify(this.protoObject)
+      const outputObject = JSON.stringify(this.outputObject)
+
+      localStorage.setItem('isSave', 'true')
+      localStorage.setItem('protoObject', protoObject)
+      localStorage.setItem('outputObject', outputObject)
+      alert('Saved successfully')
+    },
     reset () {
       this.protoObject = null
       this.outputObject = null
       this.dropBox.innerHTML = '拖拽要翻译的文件至此<br>Drag and drop files to translate here'
       this.inputBox.innerHTML = ''
+      localStorage.removeItem('isSave')
+      localStorage.removeItem('protoObject')
+      localStorage.removeItem('outputObject')
     }
   }
 }

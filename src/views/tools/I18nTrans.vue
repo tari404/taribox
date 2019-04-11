@@ -401,122 +401,80 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-#i18n-trans {
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-}
-
-.i18nt-button {
-  height: 40px;
-  padding: 5px 10px;
-  text-align: center;
-  line-height: 20px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: solid 1px #333;
-  margin: 20px;
-}
-
-#i18nt-file {
-  width: 300px;
-  float: left;
-}
-
-#i18nt-reset {
-  width: 60px;
-  float: left;
-  cursor: pointer;
-}
-
-#i18nt-export {
-  width: 120px;
-  float: right;
-  cursor: pointer;
-}
-
-#i18nt-download {
-  width: 200px;
-  float: right;
-  cursor: pointer;
-}
-
-.i18nt-table {
-  width: 100%;
-  padding: 10px;
-  clear: both;
-  box-sizing: border-box;
-}
-
-table {
-  width: 100%;
-  border-spacing: 0;
-  line-height: 1.5em;
-  text-align: left;
-  word-break: break-all;
-  border-top: solid 1px #333;
-  border-bottom: solid 1px #333;
-  box-sizing: border-box;
-
-  >>> tbody {
-    td {
-      border-top: solid 1px #bbb;
-    }
-
-    .key {
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .value {
-      padding: 2px 0.5em;
-      color: #666;
-      font-size: 12px;
-    }
-
-    .input {
-      padding: 2px 0.5em;
-      background-color: #fffef6;
-      font-size: 12px;
-      outline: #666;
-
-      &:focus {
-        outline: none;
-        background-color: #fff9e5;
-      }
-    }
-
-    .level-0>.key {
-      padding-left: 0.5em;
-    }
-
-    .level-1>.key {
-      padding-left: 1em;
-    }
-
-    .level-2>.key {
-      padding-left: 1.5em;
-    }
-
-    .level-3>.key {
-      padding-left: 2em;
-    }
-
-    .level-4>.key {
-      padding-left: 2.5em;
-    }
-
-    .level-5>.key {
-      padding-left: 3em;
-    }
-
-    .level-6>.key {
-      padding-left: 3.5em;
-    }
-
-    .level-7>.key {
-      padding-left: 4em;
-    }
-  }
-}
+#i18n-trans
+  width 100%
+  height 100%
+  overflow auto
+.i18nt-button
+  height 40px
+  padding 5px 10px
+  text-align center
+  line-height 20px
+  font-size 14px
+  border-radius 6px
+  border solid 1px #333
+  margin 20px
+#i18nt-file
+  width 300px
+  float left
+#i18nt-reset
+  width 60px
+  float left
+  cursor pointer
+#i18nt-download
+  width 200px
+  float right
+  cursor pointer
+#i18nt-export
+  width 120px
+  float right
+  cursor pointer
+.i18nt-table
+  width 100%
+  padding 10px
+  clear both
+  box-sizing border-box
+table
+  width 100%
+  border-spacing 0
+  line-height 1.5em
+  text-align left
+  word-break break-all
+  border-top solid 1px #333
+  border-bottom solid 1px #333
+  box-sizing border-box
+  >>> tbody
+    td
+      border-top solid 1px #bbb
+    .key
+      font-weight bold
+      font-size 14px
+    .value
+      padding 2px 0.5em
+      color #666
+      font-size 12px
+    .input
+      padding 2px 0.5em
+      background-color #fffef6
+      font-size 12px
+      outline #666
+      &:focus
+        outline none
+        background-color #fff9e5
+    .level-0>.key
+      padding-left 0.5em
+    .level-1>.key
+      padding-left 1em
+    .level-2>.key
+      padding-left 1.5em
+    .level-3>.key
+      padding-left 2em
+    .level-4>.key
+      padding-left 2.5em
+    .level-5>.key
+      padding-left 3em
+    .level-6>.key
+      padding-left 3.5em
+    .level-7>.key
+      padding-left 4em
 </style>

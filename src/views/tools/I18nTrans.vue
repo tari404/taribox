@@ -8,10 +8,10 @@
       重置
       <br>Reset
     </div>
-    <!-- <div id="i18nt-reset" class="i18nt-button" @click="save">
+    <div id="i18nt-reset" class="i18nt-button" @click="save">
       保存
       <br>Save
-    </div> -->
+    </div>
     <a id="downlink"></a>
     <div id="i18nt-download" class="i18nt-button" @click="download">
       下载翻译结果
@@ -79,25 +79,23 @@ export default {
       try {
         this.protoObject = JSON.parse(protoObject);
         this.outputObject = JSON.parse(outputObject);
-        // this.excelArr = JSON.parse(excelArr);
+        this.excelArr = JSON.parse(excelArr);
       } catch (err) {
         this.reset();
         alert("解析失败，请向技术人员确认文件是否损坏");
       }
       this.parseInputBox(this.outputObject, 0, this.protoObject);
+      // this.parseInputBox(JSON.parse(protoObject), 0);
       // console.log('this.excelArr', this.excelArr);
-
-      // const parseExcelArr = this.excelArr.map(x => {
-      //   return {
-      //     index: x[0],
-      //     translated: x[1],
-      //     value: x[2]
-      //   }
-      // })
-      // setTimeout(() => {
-      //   this.dealFile(parseExcelArr)
-      // }, 1500);
-      console.log('parseExcelArr', parseExcelArr);
+      // debugger
+      const parseExcelArr = this.excelArr.map(x => {
+        return {
+          index: x[0],
+          value: x[1],
+          translated: x[2] || ''
+        }
+      })
+      this.dealFile(parseExcelArr)
     }
   },
   methods: {
@@ -106,8 +104,6 @@ export default {
       return data;
     },
     dealFile (data) {
-      console.log('datadata', data);
-
       // 处理导入的数据
       this.imFile.value = "";
       this.fullscreenLoading = false;
@@ -398,6 +394,7 @@ export default {
       localStorage.removeItem("isSave");
       localStorage.removeItem("protoObject");
       localStorage.removeItem("outputObject");
+      localStorage.removeItem("excelArr");
     }
   }
 };

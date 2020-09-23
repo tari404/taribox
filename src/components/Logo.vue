@@ -88,6 +88,7 @@ export default {
   width 200px
   height 200px
   margin auto
+  transform rotate(5deg)
 .logo-container>div
   position absolute
   width 50%

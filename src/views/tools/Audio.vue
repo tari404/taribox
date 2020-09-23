@@ -7,9 +7,10 @@
 </template>
 
 <script>
-import * as THREE from 'three'
-import OrbitControls from 'three-orbitcontrols'
+import 'three/examples/js/controls/OrbitControls'
 import axios from 'axios'
+
+const THREE = window.THREE
 const AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext
 const audioCtx = new AudioContext()
 
@@ -19,7 +20,7 @@ function init () {
   analyser = audioCtx.createAnalyser()
   panner = audioCtx.createPanner()
 
-  axios.get(`${process.env.BASE_URL}music.mp3`, {
+  axios.get(`${process.env.BASE_URL}loop566.wav`, {
     responseType: 'arraybuffer'
   }).then(res => {
     audioCtx.decodeAudioData(res.data, buffer => {
@@ -157,7 +158,7 @@ export default {
     const ctx = canvas.getContext('webgl')
     canvasCtx = this.$el.querySelector('#canvas').getContext('2d')
     canvasCtx.fillStyle = '#ff9b1f'
-    const controls = new OrbitControls(camera, canvas)
+    const controls = new THREE.OrbitControls(camera, canvas)
     controls.target = new THREE.Vector3(0, 0, 0)
     controls.minDistance = 5
     controls.minZoom = 0.7
@@ -179,9 +180,11 @@ export default {
   beforeDestroy () {
     window.removeEventListener('resize', updateCamera)
     cancelAnimationFrame(raf)
-    sourceNode.stop()
-    isStart = false
-    soundSource.position.set(0, 0, 0)
+    if (isStart) {
+      sourceNode.stop()
+      isStart = false
+      soundSource.position.set(0, 0, 0)
+    }
   }
 }
 </script>

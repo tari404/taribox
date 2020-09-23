@@ -26,11 +26,11 @@
 </template>
 
 <script>
-import * as THREE from 'three'
-import OrbitControls from 'three-orbitcontrols'
-import GLTFLoader from 'three-gltf-loader'
+// import * as THREE from 'three'
+import 'three/examples/js/controls/OrbitControls'
+import 'three/examples/js/loaders/GLTFLoader'
 
-window.THREE = THREE
+const THREE = window.THREE
 
 const scene = new THREE.Scene()
 const canvas = document.createElement('canvas')
@@ -88,7 +88,7 @@ light2.position.set(11.6, 10.8, -4.3)
 // const map = new Array(6).fill(white)
 // var envMap = new THREE.CubeTextureLoader().load(map)
 
-const loader = new GLTFLoader()
+const loader = new THREE.GLTFLoader()
 loader.load(`${process.env.BASE_URL}viking_room/scene.gltf`, gltf => {
   gltf.scene.traverse(child => {
     if (child.isMesh) {
@@ -107,7 +107,7 @@ scene.add(light2)
 
 scene.add(lightHelper)
 
-const controls = new OrbitControls(camera, canvas)
+const controls = new THREE.OrbitControls(camera, canvas)
 controls.target = new THREE.Vector3(0, 4, 0)
 controls.minZoom = 0.5
 controls.maxZoom = 4

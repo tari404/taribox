@@ -7,12 +7,6 @@
 </template>
 
 <script>
-import * as THREE from 'three'
-
-if (!window.THREE) {
-  window.THREE = THREE
-}
-
 const f = (i, j) => Math.sin((i * 12.9898 + j * 78.233) % 3.14159265359) * 43758.5453 % 1
 
 export default {

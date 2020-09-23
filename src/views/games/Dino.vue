@@ -8,7 +8,7 @@
         'transform': `translateY(${-dinoJumpHeight}px)`
       }">
         <frame v-for="(url, name, index) in this.dino" :key="index"
-          v-if="dinoStatus === name" :asset="url" />
+          v-show="dinoStatus === name" :asset="url" />
       </div>
     </div>
     <div id="dino-space-key">

@@ -115,7 +115,7 @@ export default {
 
     const ctx = canvas.getContext('2d')
     const text = 'οβελisκ'
-    ctx.font = '100px ui-serif'
+    ctx.font = '100px sans-serif'
     // const text = 'hello world'
     // ctx.font = '100px monospace'
     // const text = '- GameOver -'
@@ -158,13 +158,16 @@ export default {
     renderComposer = new EffectComposer(renderer)
     const copy = new TexturePass(font.texture)
     renderComposer.addPass(copy)
-    const magic = new ShaderPass(magicShader)
-    magic.material.uniforms.uTime.value = this.clock.getElapsedTime()
-    magic.material.uniforms.uColor1.value = new THREE.Color(0x52ddfc)
-    magic.material.uniforms.uColor2.value = new THREE.Color(0x52ddfc)
-    // magic.material.uniforms.uColor1.value = new THREE.Color(0xf10028)
-    // magic.material.uniforms.uColor2.value = new THREE.Color(0xf10028)
-    magic.material.uniforms.uBackground.value = new THREE.Color(0x0a0e15)
+
+    const magicMaterial = new THREE.ShaderMaterial(magicShader)
+    magicMaterial.uniforms.uTime.value = this.clock.getElapsedTime()
+    magicMaterial.uniforms.uColor1.value = new THREE.Color(0x52ddfc)
+    magicMaterial.uniforms.uColor2.value = new THREE.Color(0x52ddfc)
+    // magicMaterial.uniforms.uColor1.value = new THREE.Color(0xf10028)
+    // magicMaterial.uniforms.uColor2.value = new THREE.Color(0xf10028)
+    magicMaterial.uniforms.uBackground.value = new THREE.Color(0x0a0e15)
+    magicMaterial.extensions.derivatives = true
+    const magic = new ShaderPass(magicMaterial)
     this.magic = magic
     renderComposer.addPass(magic)
     renderComposer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH, HEIGHT), 0.7, -2, 0.08))

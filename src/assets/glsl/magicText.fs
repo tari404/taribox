@@ -1,3 +1,6 @@
+#extension GL_OES_standard_derivatives : enable
+precision highp float;
+
 uniform sampler2D tDiffuse;
 uniform float uTime;
 uniform float uAnimate;
@@ -7,11 +10,7 @@ uniform vec3 uBackground;
 varying vec2 vUv;
 
 #pragma glslify: noise = require('glsl-noise/simplex/3d')
-
-float aastep(float threshold, float value) {
-  float afwidth = length(vec2(dFdx(value), dFdy(value))) * 0.70710678118654757;
-  return smoothstep(threshold-afwidth, threshold+afwidth, value);
-}
+#pragma glslify: aastep = require('glsl-aastep')
 
 void main() {
   float offset = noise(vec3(vUv * 3.0, uTime * 0.6));

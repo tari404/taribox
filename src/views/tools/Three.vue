@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { RawShaderMaterial } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
@@ -68,6 +69,10 @@ const magicShader = {
     uBackground: { value: new THREE.Color(0xffffff) }
   },
   vertexShader: `
+uniform mat4 projectionMatrix;
+uniform mat4 modelViewMatrix;
+attribute vec3 position;
+attribute vec2 uv;
 varying vec2 vUv;
 
 void main() {
@@ -125,12 +130,12 @@ export default {
 
     material.map = new THREE.CanvasTexture(canvas)
 
-    renderer = new THREE.WebGLRenderer({
+    renderer = new THREE.WebGL1Renderer({
       canvas: this.$el.querySelector('#c1'),
       antialias: true,
       alpha: true
     })
-    // renderer.getContext().getExtension('OES_standard_derivatives')
+    renderer.getContext().getExtension('OES_standard_derivatives')
     renderer.setClearColor(0xffffff)
 
     composer = new EffectComposer(renderer)
@@ -159,7 +164,7 @@ export default {
     const copy = new TexturePass(font.texture)
     renderComposer.addPass(copy)
 
-    const magicMaterial = new THREE.ShaderMaterial(magicShader)
+    const magicMaterial = new RawShaderMaterial(magicShader)
     magicMaterial.uniforms.uTime.value = this.clock.getElapsedTime()
     magicMaterial.uniforms.uColor1.value = new THREE.Color(0x52ddfc)
     magicMaterial.uniforms.uColor2.value = new THREE.Color(0x52ddfc)

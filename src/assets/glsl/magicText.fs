@@ -1,6 +1,9 @@
 uniform sampler2D tDiffuse;
 uniform float uTime;
 uniform float uAnimate;
+uniform vec3 uColor1;
+uniform vec3 uColor2;
+uniform vec3 uBackground;
 varying vec2 vUv;
 
 #pragma glslify: noise = require('glsl-noise/simplex/3d')
@@ -11,15 +14,19 @@ float aastep(float threshold, float value) {
 }
 
 void main() {
-  vec4 texColor = texture2D(tDiffuse, vUv);
+  float offset = noise(vec3(vUv * 3.0, uTime * 0.6));
+  vec2 uv = vUv + offset * vec2(0.0, 0.005);
+  vec4 texColor = texture2D(tDiffuse, uv);
   float sdf = 1.0 - texColor.r;
   
   float alpha = 0.0;
-  float animValue = pow(abs(uAnimate * 2.0 - 1.0), 5.0);
-  float threshold = animValue * 0.7 + 0.5;
-  alpha += 0.22 * aastep(threshold, sdf + 0.5 * noise(vec3(vUv * 10.0, uTime)));
-  alpha += 0.35 * aastep(threshold, sdf + 0.1 * noise(vec3(vUv * 40.0, uTime)));
-  alpha += 0.13 * aastep(threshold, sdf);
+  vec3 color = uBackground;
+  float animValue = pow(abs(uAnimate * 2.0 - 1.0), 4.0);
+  float threshold = animValue * 1.0 + 0.5;
+  color += uColor1 * 0.15 * aastep(threshold + 0.05, sdf + 0.5 * noise(vec3(uv * 10.0, uTime)));
+  color += uColor1 * 0.3 * aastep(threshold, sdf + 0.1 * noise(vec3(uv * 40.0, uTime)));
+  color += uColor2 * 0.3 * aastep(threshold + 0.36, sdf);
+  // color = mix(color, uColor2, aastep(threshold + 0.36, sdf));
 
-  gl_FragColor = vec4(vec3(0.0), alpha);
+  gl_FragColor = vec4(color, 1.0);
 }

@@ -1,7 +1,6 @@
 <template>
-  <div>
-    <p>Three.js</p>
-    <canvas id="c1" width="600" height="400"></canvas>
+  <div class="bg">
+    <canvas id="c1" :width="w" :height="h"></canvas>
   </div>
 </template>
 
@@ -10,8 +9,13 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { SavePass } from 'three/examples/jsm/postprocessing/SavePass.js'
+import { TexturePass } from 'three/examples/jsm/postprocessing/TexturePass.js'
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 
 import magicTextFs from '@/assets/glsl/magicText.fs'
+
+const WIDTH = 600
+const HEIGHT = 400
 
 const THREE = window.THREE
 
@@ -58,7 +62,10 @@ const magicShader = {
   uniforms: {
     tDiffuse: { value: null },
     uTime: { value: 0 },
-    uAnimate: { value: 0 }
+    uAnimate: { value: 0 },
+    uColor1: { value: new THREE.Color(0x000000) },
+    uColor2: { value: new THREE.Color(0x000000) },
+    uBackground: { value: new THREE.Color(0xffffff) }
   },
   vertexShader: `
 varying vec2 vUv;
@@ -73,29 +80,29 @@ void main() {
 }
 
 const scene = new THREE.Scene()
-const camera = new THREE.OrthographicCamera(-300, 300, 200, -200, 1, 200)
+const camera = new THREE.OrthographicCamera(-WIDTH / 2, WIDTH / 2, HEIGHT / 2, -HEIGHT / 2, 1, 200)
 camera.position.set(0, 0, 100)
 scene.add(camera)
-
-const helper = new THREE.AxesHelper(50)
-helper.position.z = 1
-scene.add(helper)
 
 const material = new THREE.MeshBasicMaterial({
   transparent: true
 })
-const mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(600, 400), material)
+const mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(WIDTH, HEIGHT), material)
 scene.add(mesh)
 
 let composer = null
+let renderComposer = null
 let renderer = null
 
-const font = new THREE.WebGLRenderTarget(600, 400)
+// eslint-disable-next-line no-unused-vars
+const font = new THREE.WebGLRenderTarget(WIDTH, HEIGHT)
 
 export default {
   name: 'Three',
   data () {
     return {
+      w: WIDTH,
+      h: HEIGHT,
       handle: null,
       magic: null,
       clock: new THREE.Clock(true)
@@ -103,14 +110,18 @@ export default {
   },
   mounted () {
     const canvas = document.createElement('canvas')
-    canvas.width = 600
-    canvas.height = 400
+    canvas.width = WIDTH
+    canvas.height = HEIGHT
 
-    const text = '测试ABC123'
     const ctx = canvas.getContext('2d')
+    const text = 'οβελisκ'
     ctx.font = '100px ui-serif'
+    // const text = 'hello world'
+    // ctx.font = '100px monospace'
+    // const text = '- GameOver -'
+    // ctx.font = 'bold 100px serif'
     const width = ctx.measureText(text).width
-    ctx.fillText(text, 300 - width / 2, 200)
+    ctx.fillText(text, WIDTH / 2 - width / 2, HEIGHT / 2)
 
     material.map = new THREE.CanvasTexture(canvas)
 
@@ -128,7 +139,7 @@ export default {
     composer.addPass(renderPass)
 
     const blurMaterial = new THREE.ShaderMaterial(fastGaussianBlurShader)
-    blurMaterial.uniforms.uResolution.value = new THREE.Vector2(600, 400)
+    blurMaterial.uniforms.uResolution.value = new THREE.Vector2(WIDTH, HEIGHT)
     const horizontalBlur = new ShaderPass(blurMaterial)
     composer.addPass(horizontalBlur)
     composer.addPass(horizontalBlur)
@@ -144,10 +155,19 @@ export default {
     composer.addPass(savePass)
     composer.render()
 
+    renderComposer = new EffectComposer(renderer)
+    const copy = new TexturePass(font.texture)
+    renderComposer.addPass(copy)
     const magic = new ShaderPass(magicShader)
     magic.material.uniforms.uTime.value = this.clock.getElapsedTime()
-    // magic.renderToScreen = true
+    magic.material.uniforms.uColor1.value = new THREE.Color(0x52ddfc)
+    magic.material.uniforms.uColor2.value = new THREE.Color(0x52ddfc)
+    // magic.material.uniforms.uColor1.value = new THREE.Color(0xf10028)
+    // magic.material.uniforms.uColor2.value = new THREE.Color(0xf10028)
+    magic.material.uniforms.uBackground.value = new THREE.Color(0x0a0e15)
     this.magic = magic
+    renderComposer.addPass(magic)
+    renderComposer.addPass(new UnrealBloomPass(new THREE.Vector2(WIDTH, HEIGHT), 0.7, -2, 0.08))
 
     this.handle = requestAnimationFrame(this.update)
   },
@@ -158,8 +178,9 @@ export default {
     update () {
       const t = this.clock.getElapsedTime()
       this.magic.material.uniforms.uTime.value = t
-      this.magic.material.uniforms.uAnimate.value = t % 6 / 6
-      this.magic.render(renderer, null, font)
+      this.magic.material.uniforms.uAnimate.value = Math.max(0, t % 7 - 1) / 6
+      // this.magic.render(renderer, null, font)
+      renderComposer.render()
       this.handle = requestAnimationFrame(this.update)
     }
   }
@@ -167,7 +188,18 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.bg
+  width 100%
+  height 100%
+  background-color #0a0e15
+  display flex
+  justify-content center
+  align-items center
 canvas
   display block
   margin 10px
+
+@media screen and (max-width 500px)
+  canvas
+    transform rotate(90deg) translateY(150px)
 </style>

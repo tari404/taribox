@@ -12,5 +12,8 @@ module.exports = {
       .use('raw-loader')
       .loader('raw-loader')
       .end()
+      .use('glslify-loader')
+      .loader('glslify-loader')
+      .end()
   }
 }

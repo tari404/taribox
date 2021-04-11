@@ -31,10 +31,17 @@ export default {
         { x: 14, y: 11 },
         { x: 14, y: 10 },
         { x: 14, y: 9 }
-      ]
+      ],
+
+      aim: { x: 0, y: 0 }
     }
   },
   mounted () {
+    this.aim = {
+      x: Math.floor(2 + Math.random() * 16),
+      y: Math.floor(2 + Math.random() * 16)
+    }
+
     const canvas = this.$el.querySelector('canvas')
     this.ctx = canvas.getContext('2d')
     this.ctx.fillStyle = '#444'
@@ -77,6 +84,7 @@ export default {
       for (const body of this.snakeBody) {
         this.ctx.fillRect(body.x * 10 + 1, body.y * 10 + 1, 8, 8)
       }
+      this.ctx.fillRect(this.aim.x * 10 + 1, this.aim.y * 10 + 1, 8, 8)
     },
     updateFrame () {
       if (!this.running) {

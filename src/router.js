@@ -43,7 +43,7 @@ export default new Router({
     {
       path: '/whiteboard',
       name: 'Whiteboard',
-      component: () => import('@/views/Whiteboard')
+      component: () => import('@/views/bygone/Whiteboard_3')
     }
   ]
 })

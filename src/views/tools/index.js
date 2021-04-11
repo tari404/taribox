@@ -42,6 +42,13 @@ export default [
     component: () => import(/* webpackChunkName: "webgl" */ './Three.vue')
   },
   {
+    name: 'Three 2',
+    path: 'three-2',
+    title: 'Three.js研究 2',
+    intro: '正在用于研究three.js及webgl的空白页面。',
+    component: () => import(/* webpackChunkName: "webgl" */ './Three2.vue')
+  },
+  {
     name: 'i18nTrans',
     path: 'i18n-trans',
     title: 'i18n的JSON文件翻译助手',

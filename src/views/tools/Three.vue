@@ -84,6 +84,8 @@ void main() {
   fragmentShader: magicTextFs
 }
 
+console.log(magicTextFs)
+
 const scene = new THREE.Scene()
 const camera = new THREE.OrthographicCamera(-WIDTH / 2, WIDTH / 2, HEIGHT / 2, -HEIGHT / 2, 1, 200)
 camera.position.set(0, 0, 100)
